@@ -18,12 +18,12 @@ jobs:
     - name: Checkout backend
       uses: actions/checkout@v4
       with:
-        repository: 'hirvovi1/pgapi' # Esim. 'kalle/java-backend'
-        path: backend-repo # Ladataan backend tähän alikansioon
+        repository: 'hirvovi1/pgapi'
+        path: pgapi # Ladataan backend tähän alikansioon
 
     # 3. Käynnistetään Java-backend Docker Composella
     - name: Start Backend via Docker Compose
-      run: docker compose -f backend-repo/compose.yaml up --build -d
+      run: docker compose -f pgapi/compose.yaml up --build -d
 
     # 4. Odotetaan, että H2 ja Java-backend ovat täysin käynnistyneet
     - name: Wait for Backend to be ready
@@ -39,7 +39,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 20
+        node-version: 24
         cache: 'npm'
 
     - name: Install dependencies
@@ -57,7 +57,7 @@ jobs:
     # 7. Siivotaan Docker-kontit aina testien päätteeksi
     - name: Stop Docker containers
       if: always()
-      run: docker compose -f backend-repo/compose.yaml down
+      run: docker compose -f pgapi/compose.yaml down
 
     # 8. Tallennetaan Playwrightin testiraportti mahdollisten virheiden selvittämiseksi
     - name: Upload Playwright report
