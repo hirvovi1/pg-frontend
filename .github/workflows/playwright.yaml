@@ -29,12 +29,17 @@ jobs:
     - name: Wait for Backend to be ready
       run: |
         echo "Waiting for backend to respond..."
-        until $(curl --output /dev/null --silent --head --fail http://localhost:8080); do
+        until curl --output /dev/null --silent --head http://localhost:8080; do
           printf '.'
           sleep 5
         done
-        echo "Backend is up!"
+        echo "Backend responded!"
 
+    # 4.5 TÄMÄ TULOSTAA LOKIT, jos palvelu ei käynnisty tai pollaus aikakatkaistaan
+    - name: Dump Docker logs on failure
+      if: always() # Tulostetaan aina, niin näet tilanteen joka tapauksessa
+      run: docker compose -f pgapi/compose.yaml logs
+    
     # 5. Asennetaan Node.js ja Playwright-ympäristö
     - name: Setup Node.js
       uses: actions/setup-node@v4
