@@ -64,6 +64,17 @@ export const paytrailService = {
   },
 
   /**
+   * DELETE /accounts/{id}
+   * Map to Java backend: deleteAccount(): void
+   */
+  deleteAccount: async (accountId: string): Promise<void> => {
+    const response = await fetch(`${API_BASE_URL}/accounts/${accountId}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) throw new Error('Failed to delete account');
+  },
+
+  /**
    * POST /transfer
    * Map to Java backend: transfer(): ResponseEntity<?>
    */

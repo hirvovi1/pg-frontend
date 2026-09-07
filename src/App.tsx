@@ -9,6 +9,7 @@ function App() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deletingAccountId, setDeletingAccountId] = useState<string | null>(null);
   const fetchAccounts = async () => {
     try {
       setAccounts(await paytrailService.getAllAccounts());
@@ -24,6 +25,20 @@ function App() {
   }, []);
 
   const refreshAccounts = () => fetchAccounts();
+
+  const handleDeleteAccount = async (accountId: string) => {
+    setError('');
+    setDeletingAccountId(accountId);
+
+    try {
+      await paytrailService.deleteAccount(accountId);
+      setAccounts((currentAccounts) => currentAccounts.filter((account) => account.id !== accountId));
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : 'Could not delete account');
+    } finally {
+      setDeletingAccountId(null);
+    }
+  };
 
   return (
     <main className="account-page">
@@ -64,6 +79,14 @@ function App() {
                 <h3>{account.ownerName}</h3>
                 <p className="account-balance">{(account.balanceInCents / 100).toFixed(2)} EUR</p>
                 <code>{account.id}</code>
+                <button
+                  className="delete-account-button"
+                  type="button"
+                  onClick={() => void handleDeleteAccount(account.id)}
+                  disabled={deletingAccountId !== null}
+                >
+                  {deletingAccountId === account.id ? 'Deleting...' : 'Delete account'}
+                </button>
               </article>
             ))}
           </div>

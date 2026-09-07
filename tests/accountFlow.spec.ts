@@ -8,4 +8,8 @@ test('creates an account with a whale promo code', async ({ page }) => {
   await expect(page.getByRole('spinbutton', { name: 'Amount' })).toHaveValue('150.00');
   await page.getByRole('button', { name: 'Create account' }).click();
   await expect(page.getByRole('dialog')).toBeHidden();
+  const accountCard = page.getByRole('article').filter({ hasText: 'Seppäilyrahasto' });
+  await expect(accountCard).toBeVisible();
+  await accountCard.getByRole('button', { name: 'Delete account' }).click();
+  await expect(accountCard).toBeHidden();
 });
