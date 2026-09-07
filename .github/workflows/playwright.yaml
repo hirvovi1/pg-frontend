@@ -1,0 +1,69 @@
+name: Playwright Tests
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+    # 1. Haetaan React-frontin koodi (tämä repo)
+    - name: Checkout frontend
+      uses: actions/checkout@v4
+
+    # 2. Haetaan Java-backendin koodi eri repositoriosta Docker-ajoa varten
+    - name: Checkout backend
+      uses: actions/checkout@v4
+      with:
+        repository: 'hirvovi1/pgapi' # Esim. 'kalle/java-backend'
+        path: backend-repo # Ladataan backend tähän alikansioon
+
+    # 3. Käynnistetään Java-backend Docker Composella
+    - name: Start Backend via Docker Compose
+      run: docker compose -f backend-repo/compose.yaml up --build -d
+
+    # 4. Odotetaan, että H2 ja Java-backend ovat täysin käynnistyneet
+    - name: Wait for Backend to be ready
+      run: |
+        echo "Waiting for backend..."
+        until $(curl --output /dev/null --silent --head --fail http://localhost:8080/actuator/health || curl --output /dev/null --silent --head --fail http://localhost:8080/api/health); do
+          printf '.'
+          sleep 5
+        done
+        echo "Backend is up!"
+
+    # 5. Asennetaan Node.js ja Playwright-ympäristö
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps
+
+    # 6. Ajetaan Playwright-testit (Playwright käynnistää React-frontin itse taustalle)
+    - name: Run Playwright tests
+      run: npx playwright test
+      env:
+        REACT_APP_API_URL: http://localhost:8080 # Jos frontti tarvitsee tiedon backendin osoitteesta build-vaiheessa
+
+    # 7. Siivotaan Docker-kontit aina testien päätteeksi
+    - name: Stop Docker containers
+      if: always()
+      run: docker compose -f backend-repo/compose.yaml down
+
+    # 8. Tallennetaan Playwrightin testiraportti mahdollisten virheiden selvittämiseksi
+    - name: Upload Playwright report
+      if: ${{ !cancelled() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: playwright-report
+        path: playwright-report/
+        retention-days: 3

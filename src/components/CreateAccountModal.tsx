@@ -7,11 +7,19 @@ interface CreateAccountModalProps {
   onAccountCreated: () => Promise<void>;
 }
 
-function CreateAccountModal({ onClose, onAccountCreated }: CreateAccountModalProps) {
+function CreateAccountModal(props: CreateAccountModalProps) {
+  const { onClose, onAccountCreated } = props;
   const [name, setName] = useState('');
   const [balance, setBalance] = useState('');
+  const [promoCode, setPromoCode] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handlePromoCodeChange = (value: string) => {
+    setPromoCode(value);
+    setBalance(value === 'WHALE' ? '150.00' : value === 'MINNOW' ? '100.00' : '');
+    setError('');
+  };
 
   const closeModal = () => {
     if (!isSubmitting) {
@@ -22,6 +30,12 @@ function CreateAccountModal({ onClose, onAccountCreated }: CreateAccountModalPro
   const handleCreateAccount = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError('');
+
+    if (promoCode && promoCode !== 'WHALE' && promoCode !== 'MINNOW') {
+      setError('Enter a valid promo code: WHALE or MINNOW.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -32,6 +46,7 @@ function CreateAccountModal({ onClose, onAccountCreated }: CreateAccountModalPro
       await onAccountCreated();
       setName('');
       setBalance('');
+      setPromoCode('');
       onClose();
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : 'Could not create account');
@@ -51,17 +66,30 @@ function CreateAccountModal({ onClose, onAccountCreated }: CreateAccountModalPro
           <button className="close-button" type="button" aria-label="Close modal" onClick={closeModal}>×</button>
         </div>
         <form onSubmit={handleCreateAccount}>
-          <label htmlFor="account-name">Account name</label>
+          <label htmlFor="account-name">Account owner</label>
           <input
             id="account-name"
             type="text"
             value={name}
             onChange={(event) => setName(event.target.value)}
-            placeholder="Everyday spending"
+            placeholder="John Doe"
             required
           />
 
-          <label htmlFor="account-balance">Opening balance</label>
+          <label htmlFor="account-promo-code">Promo code</label>
+          <input
+            id="account-promo-code"
+            type="text"
+            value={promoCode}
+            onChange={(event) => handlePromoCodeChange(event.target.value)}
+            placeholder=""
+            pattern="(WHALE|MINNOW)?"
+            title="Promo code must be WHALE, MINNOW, or empty"
+            maxLength={6}
+            disabled={isSubmitting}
+          />
+
+          <label htmlFor="account-balance">Amount</label>
           <div className="amount-input">
             <span aria-hidden="true">EUR</span>
             <input
@@ -70,9 +98,8 @@ function CreateAccountModal({ onClose, onAccountCreated }: CreateAccountModalPro
               min="0"
               step="0.01"
               value={balance}
-              onChange={(event) => setBalance(event.target.value)}
               placeholder="0.00"
-              required
+              readOnly
             />
           </div>
 

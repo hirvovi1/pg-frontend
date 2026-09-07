@@ -29,9 +29,9 @@ function App() {
     <main className="account-page">
       <header className="account-header">
         <div className="account-intro">
-          <p className="eyebrow">Paytrail accounts</p>
+          <p className="eyebrow">Webstable store accounts</p>
           <h1>Account dashboard</h1>
-          <p className="intro-copy">Manage your accounts and keep track of every balance in one place.</p>
+          <p className="intro-copy">Register as global webstable store customer</p>
         </div>
         <button className="new-account-button" type="button" onClick={() => setIsModalOpen(true)}>
           + New Account
@@ -59,7 +59,7 @@ function App() {
               <article className="account-card" key={account.id}>
                 <div className="account-card-topline">
                   <span className="account-dot" aria-hidden="true" />
-                  <span>Account</span>
+                  <span>Account owner</span>
                 </div>
                 <h3>{account.ownerName}</h3>
                 <p className="account-balance">{(account.balanceInCents / 100).toFixed(2)} EUR</p>
