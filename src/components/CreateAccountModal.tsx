@@ -9,9 +9,9 @@ interface CreateAccountModalProps {
 
 function CreateAccountModal(props: CreateAccountModalProps) {
   const { onClose, onAccountCreated } = props;
-  const [name, setName] = useState('');
-  const [balance, setBalance] = useState('');
-  const [promoCode, setPromoCode] = useState('');
+  const [name, setName] = useState('Leonard Nimoy');
+  const [balance, setBalance] = useState('150.00');
+  const [promoCode, setPromoCode] = useState('WHALE');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -36,6 +36,7 @@ function CreateAccountModal(props: CreateAccountModalProps) {
       return;
     }
 
+    handlePromoCodeChange(promoCode); // Ensure balance is set correctly based on promo code
     setIsSubmitting(true);
 
     try {

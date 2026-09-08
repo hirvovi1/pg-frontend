@@ -1,14 +1,18 @@
 import { useState } from 'react'
 import type { ChangeEvent } from 'react'
-import { paytrailService } from '../services/paytrailservice'
+import { PENDING_TRANSACTION_STORAGE_KEY, paytrailService } from '../services/paytrailservice'
 import type { Account } from '../services/paytrailservice'
 
 const CART_ITEMS = [
-  { name: 'Mechanical Keyboard', quantity: 1, priceInCents: 8500 },
-  { name: 'Ergonomic Mouse', quantity: 1, priceInCents: 3500 },
+  { name: 'Parsley', quantity: 1, priceInCents: 230 },
+  { name: 'Onions', quantity: 2, priceInCents: 249 },
+  { name: 'Tomatoes', quantity: 4, priceInCents: 329 },
+  { name: 'Turnips', quantity: 3, priceInCents: 179 },
+  { name: 'Broccoli', quantity: 1, priceInCents: 299 },
+  { name: 'Carrots', quantity: 6, priceInCents: 149 },
+  { name: 'Bell Peppers', quantity: 3, priceInCents: 399 },
+  { name: 'Spinach', quantity: 1, priceInCents: 279 },
 ]
-
-const MERCHANT_WALLET_ID = '7d8f2b5c-9a44-4f1e-b6d2-31c7e8a95024'
 
 interface CheckoutCartProps {
   accounts: Account[]
@@ -18,7 +22,7 @@ const formatAmount = (amountInCents: number) => `${(amountInCents / 100).toFixed
 
 function CheckoutCart({ accounts }: CheckoutCartProps) {
   const [selectedBuyerId, setSelectedBuyerId] = useState('')
-  const [promoCode, setPromoCode] = useState('')
+  const [promoCode] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const totalInCents = CART_ITEMS.reduce((total, item) => total + item.priceInCents * item.quantity, 0)
@@ -26,41 +30,54 @@ function CheckoutCart({ accounts }: CheckoutCartProps) {
   const handleBuyerChange = (event: ChangeEvent<HTMLSelectElement>) => {
     setSelectedBuyerId(event.target.value)
     setError('')
-  }
-
-  const handlePromoCodeChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setPromoCode(event.target.value)
-    setError('')
+    console.info('[CheckoutCart] Buyer selected', { accountId: event.target.value })
   }
 
   const handleCheckout = async () => {
     if (!selectedBuyerId) {
+      console.warn('[CheckoutCart] Checkout blocked: no buyer selected')
       setError('Select an active buyer profile before continuing.')
       return
     }
 
     if (promoCode && promoCode !== 'WHALE' && promoCode !== 'MINNOW') {
+      console.warn('[CheckoutCart] Checkout blocked: invalid promo code')
       setError('Enter a valid promo code: WHALE or MINNOW.')
       return
     }
 
     setError('')
     setIsLoading(true)
+    console.info('[CheckoutCart] Starting checkout', {
+      buyerAccountId: selectedBuyerId,
+      amountInCents: totalInCents,
+    })
 
     try {
+      const merchantAccount = await paytrailService.ensureMerchantAccount()
+      console.info('[CheckoutCart] Merchant account ready', { accountId: merchantAccount.id })
+      const idempotencyKey = crypto.randomUUID()
       const response = await paytrailService.executeTransfer({
-        idempotencyKey: crypto.randomUUID(),
+        idempotencyKey,
         accountIdFrom: selectedBuyerId,
-        accountIdTo: MERCHANT_WALLET_ID,
+        accountIdTo: merchantAccount.id,
         amountInCents: totalInCents,
+      })
+      console.info('[CheckoutCart] Transfer accepted', {
+        transactionId: response.transactionId,
+        idempotencyKey,
       })
 
       if (!response.paymentUrl) {
         throw new Error('Paytrail did not provide a checkout URL.')
       }
 
+      localStorage.setItem(PENDING_TRANSACTION_STORAGE_KEY, response.transactionId)
+      console.info('[CheckoutCart] Stored pending transaction', { transactionId: response.transactionId })
+      console.info('[CheckoutCart] Redirecting to payment URL', { paymentUrl: response.paymentUrl })
       window.location.assign(response.paymentUrl)
     } catch (requestError) {
+      console.error('[CheckoutCart] Checkout failed', requestError)
       setError(requestError instanceof Error ? requestError.message : 'Could not start Paytrail checkout.')
     } finally {
       setIsLoading(false)
@@ -105,22 +122,6 @@ function CheckoutCart({ accounts }: CheckoutCartProps) {
           </option>
         ))}
       </select>
-
-      <label className="checkout-cart-label" htmlFor="checkout-promo-code">
-        Promo code:
-      </label>
-      <input
-        className="checkout-cart-input"
-        id="checkout-promo-code"
-        type="text"
-        value={promoCode}
-        onChange={handlePromoCodeChange}
-        placeholder="Optional"
-        pattern="(WHALE|MINNOW)?"
-        title="Promo code must be WHALE, MINNOW, or empty"
-        maxLength={6}
-        disabled={isLoading}
-      />
 
       {error && <p className="message error" role="alert">{error}</p>}
 

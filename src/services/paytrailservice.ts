@@ -31,7 +31,12 @@ export interface TransferResponse {
 export interface TransactionStatusResponse {
   transactionId: string;
   status: 'PENDING' | 'SUCCESS' | 'FAILED';
+  message?: string;
 }
+
+export const PENDING_TRANSACTION_STORAGE_KEY = 'pgfrontend.pendingTransactionId';
+export const MERCHANT_ACCOUNT_ID = '7d8f2b5c-9a44-4f1e-b6d2-31c7e8a95024';
+export const MERCHANT_ACCOUNT_OWNER = 'Webstable store';
 
 
 // 2. Base URL mapping pointing to your exposed Docker container port
@@ -47,6 +52,20 @@ export const paytrailService = {
     const response = await fetch(`${API_BASE_URL}/accounts`);
     if (!response.ok) throw new Error('Failed to fetch accounts list');
     return response.json();
+  },
+
+  async ensureMerchantAccount(): Promise<Account> {
+    const accounts = await this.getAllAccounts();
+    const existingMerchant = accounts.find(
+      (account) => account.id === MERCHANT_ACCOUNT_ID || account.ownerName === MERCHANT_ACCOUNT_OWNER,
+    );
+
+    if (existingMerchant) return existingMerchant;
+
+    return this.createAccount({
+      ownerName: MERCHANT_ACCOUNT_OWNER,
+      balanceInCents: 0,
+    });
   },
 
   /**
