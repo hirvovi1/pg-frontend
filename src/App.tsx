@@ -1,28 +1,40 @@
-import { useEffect, useState } from 'react'
-import './App.css'
-import CheckoutCart from './components/CheckoutCart'
-import CreateAccountModal from './components/CreateAccountModal'
-import MockPaymentPage from './components/MockPaymentPage'
-import type { Account } from './services/paytrailservice'
-import { paytrailService } from './services/paytrailservice'
+import { useEffect, useState } from "react";
+import "./App.css";
+import CheckoutCart from "./components/CheckoutCart";
+import CreateAccountModal from "./components/CreateAccountModal";
+import MockPaymentPage from "./components/MockPaymentPage";
+import type { Account } from "./services/paytrailservice";
+import { paytrailService } from "./services/paytrailservice";
+import { MoneyDisplay } from "./components/MoneyDisplay";
+import { CurrencyProvider } from "./context/CurrencyContext";
+import { useCurrency } from "./context/CurrencyContext";
 
 function ShopApp() {
+  const { currency, setCurrency } = useCurrency();
   const [accounts, setAccounts] = useState<Account[]>([]);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [deletingAccountId, setDeletingAccountId] = useState<string | null>(null);
+  const [deletingAccountId, setDeletingAccountId] = useState<string | null>(
+    null,
+  );
   const fetchAccounts = async () => {
-    console.info('[ShopApp] Loading accounts');
+    console.info("[ShopApp] Loading accounts");
 
     try {
       const loadedAccounts = await paytrailService.getAllAccounts();
       setAccounts(loadedAccounts);
-      console.info('[ShopApp] Accounts loaded', { count: loadedAccounts.length });
+      console.info("[ShopApp] Accounts loaded", {
+        count: loadedAccounts.length,
+      });
     } catch (requestError) {
-      console.error('[ShopApp] Failed to load accounts', requestError);
-      setError(requestError instanceof Error ? requestError.message : 'Could not load accounts');
+      console.error("[ShopApp] Failed to load accounts", requestError);
+      setError(
+        requestError instanceof Error
+          ? requestError.message
+          : "Could not load accounts",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -33,22 +45,31 @@ function ShopApp() {
   }, []);
 
   const refreshAccounts = () => {
-    console.info('[ShopApp] Refreshing accounts after account creation');
+    console.info("[ShopApp] Refreshing accounts after account creation");
     return fetchAccounts();
   };
 
   const handleDeleteAccount = async (accountId: string) => {
-    console.info('[ShopApp] Deleting account', { accountId });
-    setError('');
+    console.info("[ShopApp] Deleting account", { accountId });
+    setError("");
     setDeletingAccountId(accountId);
 
     try {
       await paytrailService.deleteAccount(accountId);
-      setAccounts((currentAccounts) => currentAccounts.filter((account) => account.id !== accountId));
-      console.info('[ShopApp] Account deleted', { accountId });
+      setAccounts((currentAccounts) =>
+        currentAccounts.filter((account) => account.id !== accountId),
+      );
+      console.info("[ShopApp] Account deleted", { accountId });
     } catch (requestError) {
-      console.error('[ShopApp] Failed to delete account', { accountId, requestError });
-      setError(requestError instanceof Error ? requestError.message : 'Could not delete account');
+      console.error("[ShopApp] Failed to delete account", {
+        accountId,
+        requestError,
+      });
+      setError(
+        requestError instanceof Error
+          ? requestError.message
+          : "Could not delete account",
+      );
     } finally {
       setDeletingAccountId(null);
     }
@@ -60,23 +81,53 @@ function ShopApp() {
         <div className="account-intro">
           <p className="eyebrow">Webstable store accounts</p>
           <h1>Account dashboard</h1>
-          <p className="intro-copy">Register as global webstable store customer</p>
+          <p className="intro-copy">
+            Register as global webstable store customer
+          </p>
         </div>
+
         <div className="account-header-actions">
-          <button className="cart-button" type="button" onClick={() => setIsCartOpen((isOpen) => {
-            const nextIsCartOpen = !isOpen;
-            console.info('[ShopApp] Cart visibility changed', { isCartOpen: nextIsCartOpen });
-            return nextIsCartOpen;
-          })}>
-            {isCartOpen ? 'Hide cart' : 'View cart'}
+          <button
+            className="cart-button"
+            type="button"
+            onClick={() =>
+              setIsCartOpen((isOpen) => {
+                const nextIsCartOpen = !isOpen;
+                console.info("[ShopApp] Cart visibility changed", {
+                  isCartOpen: nextIsCartOpen,
+                });
+                return nextIsCartOpen;
+              })
+            }
+          >
+            {isCartOpen ? "Hide cart" : "View cart"}
           </button>
-          <button className="new-account-button" type="button" onClick={() => setIsModalOpen(true)}>
+          <button
+            className="new-account-button"
+            type="button"
+            onClick={() => setIsModalOpen(true)}
+          >
             + New Account
           </button>
         </div>
+        <div className="global-currency-selector">
+          <label htmlFor="global-currency">Currency: </label>
+          <select
+            id="global-currency"
+            value={currency}
+            onChange={(e) => setCurrency(e.target.value as "EUR" | "USD")}
+          >
+            <option value="EUR">EUR (€)</option>
+            <option value="USD">USD ($)</option>
+          </select>
+        </div>
       </header>
 
-      {error && !isModalOpen && !isCartOpen && <p className="message error" role="alert">{error}</p>}
+      {error && !isModalOpen && !isCartOpen && (
+        <p className="message error" role="alert">
+          {error}
+        </p>
+      )}
 
       {!isCartOpen && (
         <section className="accounts-section" aria-labelledby="accounts-title">
@@ -85,13 +136,17 @@ function ShopApp() {
               <p className="eyebrow">Overview</p>
               <h2 id="accounts-title">Your accounts</h2>
             </div>
-            <span className="account-count">{accounts.length} {accounts.length === 1 ? 'account' : 'accounts'}</span>
+            <span className="account-count">
+              {accounts.length} {accounts.length === 1 ? "account" : "accounts"}
+            </span>
           </div>
 
           {isLoading ? (
             <p className="empty-state">Loading accounts...</p>
           ) : accounts.length === 0 ? (
-            <p className="empty-state">No accounts yet. Create your first account to get started.</p>
+            <p className="empty-state">
+              No accounts yet. Create your first account to get started.
+            </p>
           ) : (
             <div className="account-grid">
               {accounts.map((account) => (
@@ -101,7 +156,10 @@ function ShopApp() {
                     <span>Account owner</span>
                   </div>
                   <h3>{account.ownerName}</h3>
-                  <p className="account-balance">{(account.balanceInCents / 100).toFixed(2)} EUR</p>
+                  <p className="account-balance">
+                    <MoneyDisplay amountInCents={account.balanceInCents} />
+                  </p>
+
                   <code>{account.id}</code>
                   <button
                     className="delete-account-button"
@@ -109,7 +167,9 @@ function ShopApp() {
                     onClick={() => void handleDeleteAccount(account.id)}
                     disabled={deletingAccountId !== null}
                   >
-                    {deletingAccountId === account.id ? 'Deleting...' : 'Delete account'}
+                    {deletingAccountId === account.id
+                      ? "Deleting..."
+                      : "Delete account"}
                   </button>
                 </article>
               ))}
@@ -127,20 +187,34 @@ function ShopApp() {
         />
       )}
     </main>
-  )
+  );
 }
 
 function App() {
-  if (window.location.pathname.startsWith('/mock-payment')) {
-    const transactionId = window.location.pathname.split('/').filter(Boolean).at(-1) ?? ''
-    const amountParam = new URLSearchParams(window.location.search).get('amountCents')
-    const parsedAmount = amountParam === null ? null : Number(amountParam)
-    const amountInCents = Number.isFinite(parsedAmount) ? parsedAmount : null
+  if (window.location.pathname.startsWith("/mock-payment")) {
+    const transactionId =
+      window.location.pathname.split("/").filter(Boolean).at(-1) ?? "";
+    const amountParam = new URLSearchParams(window.location.search).get(
+      "amountCents",
+    );
+    const parsedAmount = amountParam === null ? null : Number(amountParam);
+    const amountInCents = Number.isFinite(parsedAmount) ? parsedAmount : null;
 
-    return <MockPaymentPage transactionId={transactionId} amountInCents={amountInCents} />
+    return (
+      <CurrencyProvider>
+        <MockPaymentPage
+          transactionId={transactionId}
+          amountInCents={amountInCents}
+        />
+      </CurrencyProvider>
+    );
   }
 
-  return <ShopApp />
+  return (
+    <CurrencyProvider>
+      <ShopApp />
+    </CurrencyProvider>
+  );
 }
 
-export default App
+export default App;

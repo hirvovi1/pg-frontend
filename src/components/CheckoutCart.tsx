@@ -2,6 +2,8 @@ import { useState } from 'react'
 import type { ChangeEvent } from 'react'
 import { PENDING_TRANSACTION_STORAGE_KEY, paytrailService } from '../services/paytrailservice'
 import type { Account } from '../services/paytrailservice'
+import { useCurrency } from '../context/CurrencyContext' // Fixed relative import path
+import { MoneyDisplay } from './MoneyDisplay' // Import our helper component
 
 const CART_ITEMS = [
   { name: 'Parsley', quantity: 1, priceInCents: 230 },
@@ -18,9 +20,8 @@ interface CheckoutCartProps {
   accounts: Account[]
 }
 
-const formatAmount = (amountInCents: number) => `${(amountInCents / 100).toFixed(2)} €`
-
 function CheckoutCart({ accounts }: CheckoutCartProps) {
+  const { currency } = useCurrency() // 1. Grab global currency from Context
   const [selectedBuyerId, setSelectedBuyerId] = useState('')
   const [promoCode] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -31,6 +32,15 @@ function CheckoutCart({ accounts }: CheckoutCartProps) {
     setSelectedBuyerId(event.target.value)
     setError('')
     console.info('[CheckoutCart] Buyer selected', { accountId: event.target.value })
+  }
+
+  // 2. Local backup string formatter exclusively for HTML <option> texts
+  const formatOptionLabel = (amountInCents: number) => {
+    if (currency === 'USD') {
+      // Approximate fallback view inside native select dropdown fields (1 EUR = 1.08 USD)
+      return `$${((amountInCents / 100) * 1.08).toFixed(2)} USD (est.)`
+    }
+    return `${(amountInCents / 100).toFixed(2)} €`
   }
 
   const handleCheckout = async () => {
@@ -101,14 +111,20 @@ function CheckoutCart({ accounts }: CheckoutCartProps) {
               <strong>{item.name}</strong>
               <span>{item.quantity}x</span>
             </div>
-            <span>{formatAmount(item.priceInCents * item.quantity)}</span>
+            {/* 3. Use MoneyDisplay for line items */}
+            <span>
+              <MoneyDisplay amountInCents={item.priceInCents * item.quantity} />
+            </span>
           </div>
         ))}
       </div>
 
       <div className="checkout-cart-total">
         <span>Total</span>
-        <strong>{formatAmount(totalInCents)}</strong>
+        {/* 4. Use MoneyDisplay for checkout grand total */}
+        <strong>
+          <MoneyDisplay amountInCents={totalInCents} />
+        </strong>
       </div>
 
       <label className="checkout-cart-label" htmlFor="checkout-buyer">
@@ -118,7 +134,8 @@ function CheckoutCart({ accounts }: CheckoutCartProps) {
         <option value="">Choose an account</option>
         {accounts.map((account) => (
           <option key={account.id} value={account.id}>
-            {account.ownerName} - {formatAmount(account.balanceInCents)}
+            {/* 5. Dropdowns use text-only helper function */}
+            {account.ownerName} - {formatOptionLabel(account.balanceInCents)}
           </option>
         ))}
       </select>

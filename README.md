@@ -1,3 +1,15 @@
+
+# Payment Gateway Frontend
+
+This project is a React + TypeScript frontend for a payment gateway demo. It provides a simple checkout flow, currency conversion, mock payment handling, and account creation UI to simulate a complete storefront experience.
+
+## Running End-to-End Tests
+Ensure the Micronaut currency microservice and pgapi containers are up (`localhost:8090`), then run:
+```bash
+npx playwright test
+```
+
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

@@ -5,6 +5,8 @@ import {
 } from '../services/paytrailservice'
 import type { TransactionStatusResponse } from '../services/paytrailservice'
 
+import './MockPaymentPage.css' 
+
 interface MockPaymentPageProps {
   transactionId: string
   amountInCents: number | null
@@ -17,6 +19,9 @@ const formatAmount = (amountInCents: number | null) => (
 function MockPaymentPage({ transactionId, amountInCents }: MockPaymentPageProps) {
   const [status, setStatus] = useState<TransactionStatusResponse | null>(null)
   const [statusError, setStatusError] = useState('')
+  // Uusi tila, joka kertoo onko haku parhaillaan käynnissä (LED-valon välähdystä varten)
+  const [isPolling, setIsPolling] = useState(false)
+  
   const storedTransactionId = localStorage.getItem(PENDING_TRANSACTION_STORAGE_KEY) ?? ''
   const transactionToPoll = transactionId || storedTransactionId
 
@@ -29,12 +34,21 @@ function MockPaymentPage({ transactionId, amountInCents }: MockPaymentPageProps)
     let pollTimeout: ReturnType<typeof setTimeout> | undefined
 
     const pollStatus = async () => {
+      // Sytytetään "aktiivinen" LED-valo haun ajaksi
+      if (isMounted) setIsPolling(true)
+
       try {
         const currentStatus = await paytrailService.getTransactionStatus(transactionToPoll)
         if (!isMounted) return
 
         setStatus(currentStatus)
         setStatusError('')
+        
+        // Pieni viive sammutuksessa, jotta nopea haku näkyy selkeänä välähdyksenä
+        setTimeout(() => {
+          if (isMounted) setIsPolling(false)
+        }, 150)
+
         console.info('[MockPaymentPage] Transaction status received', {
           transactionId: transactionToPoll,
           status: currentStatus.status,
@@ -50,6 +64,11 @@ function MockPaymentPage({ transactionId, amountInCents }: MockPaymentPageProps)
 
         console.error('[MockPaymentPage] Failed to poll transaction status', requestError)
         setStatusError(requestError instanceof Error ? requestError.message : 'Could not check payment status.')
+        
+        setTimeout(() => {
+          if (isMounted) setIsPolling(false)
+        }, 150)
+
         pollTimeout = setTimeout(() => void pollStatus(), 2000)
       }
     }
@@ -73,6 +92,13 @@ function MockPaymentPage({ transactionId, amountInCents }: MockPaymentPageProps)
       ? 'Payment failed'
       : 'Waiting for payment result'
 
+  // Määritetään LED-valon väri statuksen mukaan
+  const getLedClass = () => {
+    if (status?.status === 'SUCCESS') return 'led-success'
+    if (status?.status === 'FAILED' || statusError) return 'led-error'
+    return isPolling ? 'led-polling' : 'led-pending'
+  }
+
   return (
     <main className="mock-payment-page">
       <section className="mock-payment-panel" aria-labelledby="mock-payment-title">
@@ -81,6 +107,21 @@ function MockPaymentPage({ transactionId, amountInCents }: MockPaymentPageProps)
         <p className="mock-payment-copy">
           This page simulates the external payment provider during development.
         </p>
+
+        {/* --- BLING BLING GAUGE & LED ELEMENT --- */}
+        {transactionToPoll && (
+          <div className="gauge-container">
+            <div className={`gauge-ring ${status?.status?.toLowerCase() ?? 'pending'}`}>
+              <div className="gauge-center">
+                <div className={`led-dot ${getLedClass()}`} />
+                <span className="gauge-text">
+                  {status?.status === 'PENDING' || !status ? 'POLLING' : status.status}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* -------------------------------------- */}
 
         <dl className="mock-payment-details">
           <div>
