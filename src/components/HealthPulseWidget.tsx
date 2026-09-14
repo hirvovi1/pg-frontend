@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSystemStatus } from "../context/SystemStatusContext";
 import { healthPulseService } from "../services/healthPulseService";
 import type { TelemetryEvent } from "../services/healthPulseService";
 
@@ -11,6 +12,12 @@ interface ServiceStatus {
 }
 
 export function HealthPulseWidget() {
+  const { setGlobalAlert } = useSystemStatus();
+
+  const setGlobalAlertToContext = (alert: { message: string; severity: "warning" | "critical" }) => {
+    setGlobalAlert(alert);
+  };
+
   // Alustetaan kaikki kolme aitoa kohdetta oletuksena keltaiselle,
   // kunnes ensimmäinen aito verkkosignaali saapuu
   const [systemStatuses, setSystemStatuses] = useState<
@@ -38,6 +45,7 @@ export function HealthPulseWidget() {
   useEffect(() => {
     // Pidetään muuttuja ajastimelle tässä lohkossa
     let timeoutId: ReturnType<typeof setTimeout>;
+    let errorCount = 0;
 
     const unsubscribe = healthPulseService.subscribeToPulse(
       (data: TelemetryEvent) => {
@@ -58,6 +66,19 @@ export function HealthPulseWidget() {
             lastCheck: new Date(data.timestamp).toLocaleTimeString(),
           },
         }));
+
+        if (data.status === "WARNING") {
+          errorCount += 1;
+          setGlobalAlertToContext({
+            message: `${data.service} is reporting a warning state.`,
+            severity: "warning",
+          });
+        } else if (errorCount > 2) {
+          setGlobalAlertToContext({
+            message: `All services failed.`,
+            severity: "critical",
+          });
+        }
       },
     );
 
@@ -92,3 +113,4 @@ export function HealthPulseWidget() {
 }
 
 export default HealthPulseWidget;
+
