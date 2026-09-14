@@ -15,13 +15,13 @@ interface ShopAppProps {
 
 export function ShopApp({ isWidgetOpen, onToggleWidget }: ShopAppProps) {
   const { currency, setCurrency } = useCurrency();
-  const { globalAlert } = useSystemStatus();
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [deletingAccountId, setDeletingAccountId] = useState<string | null>(null);
+  const { globalAlert, setGlobalAlert } = useSystemStatus();
    
   const getButtonAlertLevel = () => {
     if (!globalAlert) return "green";
@@ -91,8 +91,10 @@ export function ShopApp({ isWidgetOpen, onToggleWidget }: ShopAppProps) {
             isWidgetOpen={isWidgetOpen} 
             onToggleWidget={onToggleWidget} 
             widgetAlertLevel={getButtonAlertLevel()}
-        />
+        />               
+
       </div>
+      {/* toolbar ***************/}
 
       <header className="account-header">
         <div className="account-intro">

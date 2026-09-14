@@ -45,11 +45,11 @@ export function HealthPulseWidget() {
   useEffect(() => {
     // Pidetään muuttuja ajastimelle tässä lohkossa
     let timeoutId: ReturnType<typeof setTimeout>;
-    let errorCount = 0;
-
+    
     const unsubscribe = healthPulseService.subscribeToPulse(
       (data: TelemetryEvent) => {
         setPulseActive(true);
+        let errorCount = 0;
 
         // Siivotaan edellinen ajastin alta pois, jos sellainen oli käynnissä
         clearTimeout(timeoutId);
