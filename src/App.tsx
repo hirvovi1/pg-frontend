@@ -192,31 +192,29 @@ function ShopApp() {
 }
 
 function App() {
-  if (window.location.pathname.startsWith("/mock-payment")) {
-    const transactionId =
-      window.location.pathname.split("/").filter(Boolean).at(-1) ?? "";
-    const amountParam = new URLSearchParams(window.location.search).get(
-      "amountCents",
-    );
-    const parsedAmount = amountParam === null ? null : Number(amountParam);
-    const amountInCents = Number.isFinite(parsedAmount) ? parsedAmount : null;
+  const isMockPayment = window.location.pathname.startsWith('/mock-payment')
 
-    return (
-      <CurrencyProvider>
-        <MockPaymentPage
-          transactionId={transactionId}
-          amountInCents={amountInCents}
-        />
-      </CurrencyProvider>
-    );
+  // Kerätään muuttuva sivu omaan elementtiinsä
+  let pageContent;
+
+  if (isMockPayment) {
+    const transactionId = window.location.pathname.split('/').filter(Boolean).at(-1) ?? ''
+    const amountParam = new URLSearchParams(window.location.search).get('amountCents')
+    const parsedAmount = amountParam === null ? null : Number(amountParam)
+    const amountInCents = Number.isFinite(parsedAmount) ? parsedAmount : null
+
+    pageContent = <MockPaymentPage transactionId={transactionId} amountInCents={amountInCents} />
+  } else {
+    pageContent = <ShopApp />
   }
 
+  // Renderöidään yhtenäinen raami, jossa HealthPulseWidget pysyy KIINTEÄSTI paikoillaan!
   return (
     <CurrencyProvider>
-      <ShopApp />
+      {pageContent}
       <HealthPulseWidget />
     </CurrencyProvider>
-  );
+  )
 }
 
-export default App;
+export default App

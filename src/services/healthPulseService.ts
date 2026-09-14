@@ -31,7 +31,7 @@ export const healthPulseService = {
 
     // Palautetaan sulkemismetodi unmount-tilanteita varten
     return () => {
-      console.info('[HealthPulseService] Closing SSE stream connection')
+      console.info('[HealthPulseService] Closing SSE stream connection for NO REASON! Buhahahahahaaa!')
       eventSource.close()
     }
   }
