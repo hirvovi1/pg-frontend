@@ -8,6 +8,7 @@ import { paytrailService } from "./services/paytrailservice";
 import { MoneyDisplay } from "./components/MoneyDisplay";
 import { CurrencyProvider } from "./context/CurrencyContext";
 import { useCurrency } from "./context/CurrencyContext";
+import { HealthPulseWidget } from './components/HealthPulseWidget' // UUSI IMPORT
 
 function ShopApp() {
   const { currency, setCurrency } = useCurrency();
@@ -213,6 +214,7 @@ function App() {
   return (
     <CurrencyProvider>
       <ShopApp />
+      <HealthPulseWidget />
     </CurrencyProvider>
   );
 }
