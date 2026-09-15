@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import type { Account } from "../services/paytrailservice";
 import { paytrailService } from "../services/paytrailservice";
-import { MoneyDisplay } from "./MoneyDisplay";
 import { useCurrency } from "../context/CurrencyContext";
 import { useSystemStatus } from "../context/SystemStatusContext";
-import CheckoutCart from "./CheckoutCart";
+import CheckoutCartWidget from "./CheckoutCartWidget";
 import CreateAccountModal from "./CreateAccountModal";
-import { HealthToggleButton } from "./HealthToggleButton";
+import { AccountsWidget } from "./AccountsWidget";
+import { ShopHeader } from "./ShopHeader";
 
 interface ShopAppProps {
   isWidgetOpen: boolean;
@@ -15,14 +15,14 @@ interface ShopAppProps {
 
 export function ShopApp({ isWidgetOpen, onToggleWidget }: ShopAppProps) {
   const { currency, setCurrency } = useCurrency();
-  const { globalAlert } = useSystemStatus();
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [deletingAccountId, setDeletingAccountId] = useState<string | null>(null);
-   
+  const { globalAlert } = useSystemStatus();
+
   const getButtonAlertLevel = () => {
     if (!globalAlert) return "green";
     return globalAlert.severity === "critical" ? "red" : "yellow";
@@ -36,9 +36,7 @@ export function ShopApp({ isWidgetOpen, onToggleWidget }: ShopAppProps) {
       console.info("[ShopApp] Accounts loaded", { count: loadedAccounts.length });
     } catch (requestError) {
       console.error("[ShopApp] Failed to load accounts", requestError);
-      setError(
-        requestError instanceof Error ? requestError.message : "Could not load accounts",
-      );
+      setError(requestError instanceof Error ? requestError.message : "Could not load accounts");
     } finally {
       setIsLoading(false);
     }
@@ -60,15 +58,11 @@ export function ShopApp({ isWidgetOpen, onToggleWidget }: ShopAppProps) {
 
     try {
       await paytrailService.deleteAccount(accountId);
-      setAccounts((currentAccounts) =>
-        currentAccounts.filter((account) => account.id !== accountId),
-      );
+      setAccounts((currentAccounts) => currentAccounts.filter((account) => account.id !== accountId));
       console.info("[ShopApp] Account deleted", { accountId });
     } catch (requestError) {
       console.error("[ShopApp] Failed to delete account", { accountId, requestError });
-      setError(
-        requestError instanceof Error ? requestError.message : "Could not delete account",
-      );
+      setError(requestError instanceof Error ? requestError.message : "Could not delete account");
     } finally {
       setDeletingAccountId(null);
     }
@@ -76,123 +70,40 @@ export function ShopApp({ isWidgetOpen, onToggleWidget }: ShopAppProps) {
 
   return (
     <main className="account-page">
-
-      {/* toolbar ***************/}
-      <div className="quick-actions-toolbar" style={{
-        display: 'flex',
-        gap: '10px',
-        padding: '8px 24px',
-        background: '#f4f4f5',
-        borderBottom: '1px solid #e4e4e7',
-        justifyContent: 'flex-start',
-        alignItems: 'center'
-      }}>
-        <HealthToggleButton 
-            isWidgetOpen={isWidgetOpen} 
-            onToggleWidget={onToggleWidget} 
-            widgetAlertLevel={getButtonAlertLevel()}
-        />
-      </div>
-
-      <header className="account-header">
-        <div className="account-intro">
-          <p className="eyebrow">Webstable store accounts</p>
-          <h1>Account dashboard</h1>
-          <p className="intro-copy">Register as global webstable store customer</p>
-        </div>
-
-        <div className="account-header-actions">
-          <button
-            className="cart-button"
-            type="button"
-            onClick={() =>
-              setIsCartOpen((isOpen) => {
-                const nextIsCartOpen = !isOpen;
-                console.info("[ShopApp] Cart visibility changed", { isCartOpen: nextIsCartOpen });
-                return nextIsCartOpen;
-              })
-            }
-          >
-            {isCartOpen ? "Hide cart" : "View cart"}
-          </button>
-          <button
-            className="new-account-button"
-            type="button"
-            onClick={() => setIsModalOpen(true)}
-          >
-            + New Account
-          </button>
-        </div>
-        <div className="global-currency-selector">
-          <label htmlFor="global-currency">Currency: </label>
-          <select
-            id="global-currency"
-            value={currency}
-            onChange={(e) => setCurrency(e.target.value as "EUR" | "USD")}
-          >
-            <option value="EUR">EUR (€)</option>
-            <option value="USD">USD ($)</option>
-          </select>
-        </div>
-      </header>
+      <ShopHeader
+        isWidgetOpen={isWidgetOpen}
+        onToggleWidget={onToggleWidget}
+        widgetAlertLevel={getButtonAlertLevel()}
+        currency={currency}
+        onCurrencyChange={(nextCurrency) => setCurrency(nextCurrency)}
+        isCartOpen={isCartOpen}
+        onToggleCart={() =>
+          setIsCartOpen((isOpen) => {
+            const nextIsCartOpen = !isOpen;
+            console.info("[ShopApp] Cart visibility changed", { isCartOpen: nextIsCartOpen });
+            return nextIsCartOpen;
+          })
+        }
+        onCreateAccount={() => setIsModalOpen(true)}
+      />
 
       {error && !isModalOpen && !isCartOpen && (
-        <p className="message error" role="alert">{error}</p>
+        <p className="message error" role="alert">
+          {error}
+        </p>
       )}
 
       {!isCartOpen && (
-        <section className="accounts-section" aria-labelledby="accounts-title">
-          <div className="section-heading">
-            <div>
-              <p className="eyebrow">Overview</p>
-              <h2 id="accounts-title">Your accounts</h2>
-            </div>
-            <span className="account-count">
-              {accounts.length} {accounts.length === 1 ? "account" : "accounts"}
-            </span>
-          </div>
-
-          {isLoading ? (
-            <p className="empty-state">Loading accounts...</p>
-          ) : accounts.length === 0 ? (
-            <p className="empty-state">No accounts yet. Create your first account to get started.</p>
-          ) : (
-            <div className="account-grid">
-              {accounts.map((account) => (
-                <article className="account-card" key={account.id}>
-                  <div className="account-card-topline">
-                    <span className="account-dot" aria-hidden="true" />
-                    <span>Account owner</span>
-                  </div>
-                  <h3>{account.ownerName}</h3>
-                  <p className="account-balance">
-                    <MoneyDisplay amountInCents={account.balanceInCents} />
-                  </p>
-
-                  <code>{account.id}</code>
-                  <button
-                    className="delete-account-button"
-                    type="button"
-                    onClick={() => void handleDeleteAccount(account.id)}
-                    disabled={deletingAccountId !== null}
-                  >
-                    {deletingAccountId === account.id ? "Deleting..." : "Delete account"}
-                  </button>
-                </article>
-              ))}
-            </div>
-          )}
-        </section>
-      )}
-
-      {isCartOpen && <CheckoutCart accounts={accounts} />}
-
-      {isModalOpen && (
-        <CreateAccountModal
-          onClose={() => setIsModalOpen(false)}
-          onAccountCreated={refreshAccounts}
+        <AccountsWidget
+          accounts={accounts}
+          isLoading={isLoading}
+          deletingAccountId={deletingAccountId}
+          onDeleteAccount={handleDeleteAccount}
         />
       )}
+
+      {isCartOpen && <CheckoutCartWidget accounts={accounts} />}
+      {isModalOpen && <CreateAccountModal onClose={() => setIsModalOpen(false)} onAccountCreated={refreshAccounts} />}
     </main>
   );
 }

@@ -22,10 +22,7 @@ function AppContent() {
     pageContent = <MockPaymentPage transactionId={transactionId} amountInCents={amountInCents} />
   } else {
     pageContent = (
-      <ShopApp 
-        isWidgetOpen={isWidgetOpen} 
-        onToggleWidget={() => setIsWidgetOpen(prev => !prev)} 
-      />
+      <ShopApp isWidgetOpen={isWidgetOpen} onToggleWidget={() => setIsWidgetOpen(prev => !prev)} />
     );
   }
 
