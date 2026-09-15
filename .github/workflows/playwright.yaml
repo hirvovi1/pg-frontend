@@ -36,11 +36,6 @@ jobs:
         distribution: 'temurin'
         cache: 'maven'
 
-    # 5. Create Shared Docker Network
-    # Luodaan ulkoinen verkko manuaalisesti ennen kuin kumpikaan compose-tiedosto yrittää käyttää sitä.
-    - name: Create Shared Docker Network
-      run: docker network create mock-payment-network
-
     # 6. Start Core Backend Engine (Port 8080)
     - name: Start Core Backend Engine
       run: docker compose -f pgapi/compose.yaml up --build -d
