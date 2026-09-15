@@ -35,6 +35,13 @@ jobs:
         java-version: '25'
         distribution: 'temurin'
         cache: 'maven'
+        
+    # 5. Create a shared Docker network for inter-container communication    
+    - name: Create Shared Docker Network with Labels
+      run: |
+        docker network create \
+          --label "com.docker.compose.network=mock-payment-network" \
+          mock-payment-network
 
     # 6. Start Core Backend Engine (Port 8080)
     - name: Start Core Backend Engine
@@ -113,7 +120,7 @@ jobs:
     - name: Stop Microservices containers
       if: always()
       run: docker compose -f pg-backend-platform/docker-compose.yaml down
-      
+
     - name: Stop Core Backend containers
       if: always()
       run: docker compose -f pgapi/compose.yaml down
