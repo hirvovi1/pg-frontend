@@ -110,13 +110,14 @@ jobs:
         REACT_APP_API_URL: http://localhost:8080
 
     # 12. Graceful cluster cleanup
+    - name: Stop Microservices containers
+      if: always()
+      run: docker compose -f pg-backend-platform/docker-compose.yaml down
+      
     - name: Stop Core Backend containers
       if: always()
       run: docker compose -f pgapi/compose.yaml down
 
-    - name: Stop Microservices containers
-      if: always()
-      run: docker compose -f pg-backend-platform/docker-compose.yaml down
 
     # 13. Save output artifact trace packages
     - name: Upload Playwright report
