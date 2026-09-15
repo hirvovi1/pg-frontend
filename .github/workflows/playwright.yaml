@@ -36,15 +36,20 @@ jobs:
         distribution: 'temurin'
         cache: 'maven'
 
-    # 5. Start Core Backend Engine (Port 8080)
+    # 5. Create Shared Docker Network
+    # Luodaan ulkoinen verkko manuaalisesti ennen kuin kumpikaan compose-tiedosto yrittää käyttää sitä.
+    - name: Create Shared Docker Network
+      run: docker network create mock-payment-network
+
+    # 6. Start Core Backend Engine (Port 8080)
     - name: Start Core Backend Engine
       run: docker compose -f pgapi/compose.yaml up --build -d
 
-    # 6. Start Microservices Stack (Ports 8090 & 8095)
+    # 7. Start Microservices Stack (Ports 8090 & 8095)
     - name: Start Microservices Stack
       run: docker compose -f pg-backend-platform/docker-compose.yaml up --build -d
 
-    # 7. Comprehensive Cluster Health Verification
+    # 8. Comprehensive Cluster Health Verification
     - name: Wait for All Services to be ready
       run: |
           set -euo pipefail
@@ -64,9 +69,6 @@ jobs:
                 --max-time 10 \
                 "$url" || true)"
 
-              # A 2xx response proves the application endpoint is available.
-              # --max-time is expected for the long-lived SSE endpoint; curl
-              # still writes the received HTTP status before timing out.
               if [[ "$http_code" =~ ^2[0-9]{2}$ ]]; then
                 echo "$service_name is ready (HTTP $http_code)."
                 return 0
@@ -84,7 +86,7 @@ jobs:
           wait_for_service "Health Pulse monitor" "http://localhost:8095/api/pulse/stream"
           echo "Entire cluster network mesh is active and responding!"
 
-    # 8. Dump execution environment states on failures
+    # 9. Dump execution environment states on failures
     - name: Dump Core Backend logs on failure
       if: always()
       run: docker compose -f pgapi/compose.yaml logs
@@ -93,7 +95,7 @@ jobs:
       if: always()
       run: docker compose -f pg-backend-platform/docker-compose.yaml logs
     
-    # 9. Node setup and dependency injection execution
+    # 10. Node setup and dependency injection execution
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
@@ -106,13 +108,13 @@ jobs:
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
 
-    # 10. Execute E2E Suite against the full live mesh
+    # 11. Execute E2E Suite against the full live mesh
     - name: Run Playwright tests
       run: npx playwright test
       env:
         REACT_APP_API_URL: http://localhost:8080
 
-    # 11. Graceful cluster cleanup
+    # 12. Graceful cluster cleanup
     - name: Stop Core Backend containers
       if: always()
       run: docker compose -f pgapi/compose.yaml down
@@ -121,7 +123,7 @@ jobs:
       if: always()
       run: docker compose -f pg-backend-platform/docker-compose.yaml down
 
-    # 12. Save output artifact trace packages
+    # 13. Save output artifact trace packages
     - name: Upload Playwright report
       if: ${{ !cancelled() }}
       uses: actions/upload-artifact@v4
