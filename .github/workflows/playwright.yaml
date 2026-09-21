@@ -19,6 +19,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: 'hirvovi1/pgapi'
+        ref: ${{ (github.ref_name == 'dev' || github.base_ref == 'dev') && 'dev' || 'main' }}        
         path: pgapi
 
     # 3. Pull Microservice Monorepo (Port 8090 & 8095)
