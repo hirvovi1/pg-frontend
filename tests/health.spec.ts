@@ -72,7 +72,8 @@ test.describe("healthPulseService", () => {
       };
     });
     
-    expect(result.url).toBe("http://localhost:8091/api/v1/frontend/health/stream");
+    const PULSE_API_BASE = 'http://localhost:8095/api/pulse'
+    expect(result.url).toBe(PULSE_API_BASE + "/stream");
     expect(result.received).toEqual([
       {
         service: "currency service",
