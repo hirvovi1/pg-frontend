@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import type { Account } from "../services/paytrailservice";
 import { paytrailService } from "../services/paytrailservice";
+import type { Product } from "../services/productService";
+import { productService } from "../services/productService";
 import { useCurrency } from "../context/CurrencyContext";
 import { useSystemStatus } from "../context/SystemStatusContext";
 import CheckoutCartWidget from "./CheckoutCartWidget";
 import CreateAccountModal from "./CreateAccountModal";
 import { AccountsWidget } from "./AccountsWidget";
+import { ProductsWidget } from "./ProductsWidget";
 import { ShopHeader } from "./ShopHeader";
 
 interface ShopAppProps {
@@ -16,8 +19,10 @@ interface ShopAppProps {
 export function ShopApp({ isWidgetOpen, onToggleWidget }: ShopAppProps) {
   const { currency, setCurrency } = useCurrency();
   const [accounts, setAccounts] = useState<Account[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isProductsLoading, setIsProductsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [deletingAccountId, setDeletingAccountId] = useState<string | null>(null);
@@ -42,8 +47,23 @@ export function ShopApp({ isWidgetOpen, onToggleWidget }: ShopAppProps) {
     }
   };
 
+  const fetchProducts = async () => {
+    console.info("[ShopApp] Loading products");
+    try {
+      const loadedProducts = await productService.getProducts();
+      setProducts(loadedProducts);
+      console.info("[ShopApp] Products loaded", { count: loadedProducts.length });
+    } catch (requestError) {
+      console.error("[ShopApp] Failed to load products", requestError);
+      setError(requestError instanceof Error ? requestError.message : "Could not load products");
+    } finally {
+      setIsProductsLoading(false);
+    }
+  };
+
   useEffect(() => {
     void Promise.resolve().then(fetchAccounts);
+    void Promise.resolve().then(fetchProducts);
   }, []);
 
   const refreshAccounts = () => {

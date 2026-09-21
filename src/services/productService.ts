@@ -1,7 +1,4 @@
-export enum ProductStatus {
-  ACTIVE = 'ACTIVE',
-  ARCHIVED = 'ARCHIVED'
-}
+export type ProductStatus = 'ACTIVE' | 'ARCHIVED'
 
 export interface Product {
   id?: number

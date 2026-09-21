@@ -1,8 +1,4 @@
-export enum OrderStatus {
-  PENDING = 'PENDING',
-  CONFIRMED = 'CONFIRMED',
-  CANCELLED = 'CANCELLED'
-}
+export type OrderStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED'
 
 export interface OrderItem {
   id?: number

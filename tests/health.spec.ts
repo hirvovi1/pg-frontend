@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { expect, test } from "@playwright/test";
-import { TelemetryEvent } from "/src/services/healthPulseService.ts";
+import type { TelemetryEvent } from "../src/services/healthPulseService";
 
 test.describe("healthPulseService", () => {
   test("opens the SSE stream and parses valid telemetry events", async ({ page }) => {
@@ -23,7 +24,7 @@ test.describe("healthPulseService", () => {
           this.url = url;
 
           // Tallennetaan instanssi testin tarkistusta varten globaaliin tilaan
-          const globalTestEnvironment = window as any;
+          const globalTestEnvironment = window as typeof window & { __healthEventSource?: { url: string; closed: boolean } };
           globalTestEnvironment.__healthEventSource = this;
 
           this.simulateIncomingStreamData(mockTelemetryPayload);
@@ -41,13 +42,13 @@ test.describe("healthPulseService", () => {
         }
       }
 
-      const globalBrowserWindow = window as any;
-      globalBrowserWindow.EventSource = MockEventSource;
+      const globalBrowserWindow = window as typeof window & { EventSource?: new (url: string) => typeof MockEventSource.prototype };
+      globalBrowserWindow.EventSource = MockEventSource as any;
     });
 
     await page.goto("/");
     const result = await page.evaluate(async () => {
-      const { healthPulseService } = await import("/src/services/healthPulseService.ts");
+      const { healthPulseService } = await import("../src/services/healthPulseService");
       const waitForMs = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
       const receivedEvents: TelemetryEvent[] = [];
@@ -63,7 +64,7 @@ test.describe("healthPulseService", () => {
       unsubscribe();
 
       // 4. Palautetaan selkeä raportti testin tarkistusta (expect) varten
-      const mockInstance = (window as any).__healthEventSource;
+      const mockInstance = (window as typeof window & { __healthEventSource?: { url: string; closed: boolean } }).__healthEventSource;
 
       return {
         received: receivedEvents,
@@ -102,13 +103,13 @@ test.describe("healthPulseService", () => {
         }
       }
 
-      (window as any).EventSource = MockEventSource;
+      (window as typeof window & { EventSource?: new (url: string) => typeof MockEventSource.prototype }).EventSource = MockEventSource as any;
     });
 
     await page.goto("/");
 
     const result = await page.evaluate(async () => {
-      const { healthPulseService } = await import("/src/services/healthPulseService.ts");
+      const { healthPulseService } = await import("../src/services/healthPulseService");
       const receivedEvents: TelemetryEvent[] = [];
 
       const onEvent = (telemetryData: TelemetryEvent) => {
@@ -134,21 +135,21 @@ test.describe("healthPulseService", () => {
 
         close() {
           this.closed = true;
-          (window as any).__eventSourceClosed = true;
+          (window as typeof window & { __eventSourceClosed?: boolean }).__eventSourceClosed = true;
         }
       }
 
-      (window as any).EventSource = MockEventSource;
+      (window as typeof window & { EventSource?: new (url: string) => typeof MockEventSource.prototype }).EventSource = MockEventSource as any;
     });
 
     await page.goto("/");
 
     const result = await page.evaluate(async () => {
-      const { healthPulseService } = await import("/src/services/healthPulseService.ts");
+      const { healthPulseService } = await import("../src/services/healthPulseService");
       const unsubscribe = healthPulseService.subscribeToPulse(() => undefined);
       unsubscribe();
 
-      return (window as any).__eventSourceClosed === true;
+      return (window as typeof window & { __eventSourceClosed?: boolean }).__eventSourceClosed === true;
     });
 
     expect(result).toBe(true);
