@@ -71,8 +71,9 @@ test.describe("healthPulseService", () => {
         closed: mockInstance?.closed,
       };
     });
-
-    expect(result.url).toBe("http://localhost:8095/api/pulse/stream");
+    
+    const PULSE_API_BASE = 'http://localhost:8095/api/pulse'
+    expect(result.url).toBe(PULSE_API_BASE + "/stream");
     expect(result.received).toEqual([
       {
         service: "currency service",
