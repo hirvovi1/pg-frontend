@@ -1,9 +1,9 @@
 name: Playwright Tests
 on:
   push:
-    branches: [ main, master, test-ci-sandbox ]
+    branches: [ main, test-ci-sandbox, dev ]
   pull_request:
-    branches: [ main, master, test-ci-sandbox ]
+    branches: [ main, test-ci-sandbox, dev ]
 
 jobs:
   test:
