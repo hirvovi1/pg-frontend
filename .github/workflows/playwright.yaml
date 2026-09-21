@@ -26,7 +26,9 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: 'hirvovi1/pg-backend-platform'
+        ref: ${{ (github.ref_name == 'dev' || github.base_ref == 'dev') && 'dev' || 'main' }}
         path: pg-backend-platform
+
 
     # 4. Set up JDK 25 environment so the monorepo can execute ./mvnw safely
     - name: Set up JDK 25
