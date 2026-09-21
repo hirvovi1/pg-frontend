@@ -5,7 +5,7 @@ export interface UsdConversionResponse {
   convertedAmount: string
 }
 
-const MICRONAUT_API_BASE = 'http://localhost:8090/api/usd'
+const MICRONAUT_API_BASE = 'http://localhost:8091/api/v1/frontend/currency'
 
 export const currencyService = {
   /**

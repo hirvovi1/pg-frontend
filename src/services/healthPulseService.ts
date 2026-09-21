@@ -6,7 +6,6 @@ export interface TelemetryEvent {
 }
 
 const PULSE_API_BASE = 'http://localhost:8095/api/pulse'
-
 export const healthPulseService = {
   /**
    * Avaa reaaliaikaisen Server-Sent Events (SSE) -yhteyden Health Pulse -mikropalveluun.
