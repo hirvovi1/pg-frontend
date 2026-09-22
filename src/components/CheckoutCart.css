@@ -1,0 +1,266 @@
+/* ==========================================================================
+   CheckoutCart.css - Final cleaned version
+   ========================================================================== */
+
+/* Main cart container */
+.checkout-cart {
+    width: min(100%, 420px);
+    box-sizing: border-box;
+    padding: 24px;
+    border: 1px solid var(--accent-border, #d8b4fe);
+    border-radius: 12px;
+    background: #fff;
+    text-align: left;
+    box-shadow: var(--shadow);
+}
+
+/* Header section */
+.checkout-cart-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 20px;
+}
+
+.checkout-cart-heading h2 {
+    margin: 4px 0 0 0;
+    font-size: 24px;
+    color: var(--text-h, #18181b);
+}
+
+.checkout-cart-count {
+    font-size: 14px;
+    color: #71717a;
+    font-family: var(--mono);
+}
+
+/* Empty cart state */
+.empty-state {
+    padding: 24px 0;
+    color: #71717a;
+    text-align: center;
+    font-style: italic;
+}
+
+/* Cart items */
+.checkout-cart-items {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Product row frame (resets external flexbox conflicts) */
+.checkout-cart-item {
+    display: block !important;
+    padding: 16px 0 !important;
+    border-top: 1px solid #e4e4e7 !important;
+    text-align: left !important;
+}
+
+.checkout-cart-item:last-of-type {
+    border-bottom: 1px solid #e4e4e7 !important;
+}
+
+/* Top row: Name on left, price + delete button on right */
+.cart-item-top-row {
+    display: block !important;
+    margin-bottom: 12px !important;
+    clear: both !important;
+}
+
+.cart-item-name {
+    float: left !important;
+    font-weight: 600 !important;
+    color: #18181b !important;
+    font-size: 15px !important;
+}
+
+/* Group price and delete button neatly on the right */
+.cart-item-price-group {
+    float: right !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+}
+
+.cart-item-price-display {
+    font-weight: 700 !important;
+    color: #18181b !important;
+    font-size: 15px !important;
+}
+
+/* Modern, unobtrusive delete button */
+.remove-icon-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: none !important;
+    border: none !important;
+    color: #a1a1aa !important;
+    cursor: pointer !important;
+    padding: 4px !important;
+    border-radius: 4px !important;
+    transition: all 0.2s ease !important;
+}
+
+/* Hover state: delete button turns red */
+.remove-icon-btn:hover:not(:disabled) {
+    color: #ef4444 !important;
+    background-color: #fef2f2 !important;
+}
+
+.remove-icon-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Bottom row: Quantity controls on the right under price */
+.cart-item-bottom-row {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    clear: both !important;
+    padding-top: 6px !important;
+    width: 100% !important;
+}
+
+/* Gray background panel for quantity controls */
+.quantity-controls {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 6px !important;
+    background: #f4f4f5 !important;
+    padding: 3px 6px !important;
+    border-radius: 6px !important;
+}
+
+.micro-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 22px !important;
+    height: 22px !important;
+    padding: 0 !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    background: #fff !important;
+    border: 1px solid #e4e4e7 !important;
+    border-radius: 4px !important;
+    cursor: pointer !important;
+    color: #3f3f46 !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.micro-btn:hover:not(:disabled) {
+    background: #fff !important;
+    border-color: #a1a1aa !important;
+}
+
+.micro-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.quantity-display {
+    display: inline-block !important;
+    text-align: center !important;
+    min-width: 20px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #18181b !important;
+}
+
+/* Total sum */
+.checkout-cart-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 24px 0;
+    font-size: 16px;
+}
+
+.checkout-cart-total span {
+    font-weight: 500;
+    color: #3f3f46;
+}
+
+.checkout-cart-total strong {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent, #7c3aed);
+}
+
+/* Buyer profile selector */
+.checkout-cart-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #18181b;
+}
+
+.modern-select {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-family: inherit;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    background-color: #fff;
+    color: #18181b;
+    cursor: pointer;
+    appearance: none; /* Removes browser default arrow */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://w3.org' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    padding-right: 40px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    margin-bottom: 20px;
+}
+
+.modern-select:focus {
+    outline: none;
+    border-color: var(--accent-border, #d8b4fe);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+}
+
+.modern-select:disabled {
+    background: #f4f4f5;
+    cursor: not-allowed;
+}
+
+/* Error messages */
+.message.error {
+    margin: 0 0 16px 0;
+    padding: 10px 12px;
+    background: #fdeaea;
+    color: #a12727;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Paytrail checkout button */
+.checkout-cart-button {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    background: var(--accent, #7c3aed);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.checkout-cart-button:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+.checkout-cart-button:disabled {
+    background: #a1a1aa;
+    cursor: not-allowed;
+}

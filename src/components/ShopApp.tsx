@@ -5,18 +5,20 @@ import type { Product } from "../services/productService";
 import { productService } from "../services/productService";
 import { useCurrency } from "../context/CurrencyContext";
 import { useSystemStatus } from "../context/SystemStatusContext";
-import CheckoutCartWidget from "./CheckoutCartWidget";
+import CheckoutCartWidget from "./CheckoutCart.tsx";
 import CreateAccountModal from "./CreateAccountModal";
 import { AccountsWidget } from "./AccountsWidget";
 import { ProductsWidget } from "./ProductsWidget";
 import { ShopHeader } from "./ShopHeader";
 
+type View = 'accounts' | 'cart' | 'products';
+
 interface ShopAppProps {
-  isWidgetOpen: boolean;
+  healthWidget: boolean;
   onToggleWidget: () => void;
 }
 
-export function ShopApp({ isWidgetOpen, onToggleWidget }: ShopAppProps) {
+export function ShopApp({ healthWidget, onToggleWidget }: ShopAppProps) {
   const { currency, setCurrency } = useCurrency();
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -24,7 +26,7 @@ export function ShopApp({ isWidgetOpen, onToggleWidget }: ShopAppProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isProductsLoading, setIsProductsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [currentView, setCurrentView] = useState<View>('accounts');
   const [deletingAccountId, setDeletingAccountId] = useState<string | null>(null);
   const { globalAlert } = useSystemStatus();
 
@@ -91,29 +93,23 @@ export function ShopApp({ isWidgetOpen, onToggleWidget }: ShopAppProps) {
   return (
     <main className="account-page">
       <ShopHeader
-        isWidgetOpen={isWidgetOpen}
+        healthWidget={healthWidget}
         onToggleWidget={onToggleWidget}
         widgetAlertLevel={getButtonAlertLevel()}
         currency={currency}
         onCurrencyChange={(nextCurrency) => setCurrency(nextCurrency)}
-        isCartOpen={isCartOpen}
-        onToggleCart={() =>
-          setIsCartOpen((isOpen) => {
-            const nextIsCartOpen = !isOpen;
-            console.info("[ShopApp] Cart visibility changed", { isCartOpen: nextIsCartOpen });
-            return nextIsCartOpen;
-          })
-        }
+        currentView={currentView}
+        onViewChange={setCurrentView}
         onCreateAccount={() => setIsModalOpen(true)}
       />
 
-      {error && !isModalOpen && !isCartOpen && (
+      {error && !isModalOpen && (
         <p className="message error" role="alert">
           {error}
         </p>
       )}
 
-      {!isCartOpen && (
+      {currentView === 'accounts' && (
         <AccountsWidget
           accounts={accounts}
           isLoading={isLoading}
@@ -122,7 +118,14 @@ export function ShopApp({ isWidgetOpen, onToggleWidget }: ShopAppProps) {
         />
       )}
 
-      {isCartOpen && <CheckoutCartWidget accounts={accounts} />}
+      {currentView === 'cart' && <CheckoutCartWidget accounts={accounts} />}
+
+      {currentView === 'products' && (
+        <ProductsWidget
+          products={products}
+          isLoading={isProductsLoading}
+        />
+      )}
       {isModalOpen && <CreateAccountModal onClose={() => setIsModalOpen(false)} onAccountCreated={refreshAccounts} />}
     </main>
   );

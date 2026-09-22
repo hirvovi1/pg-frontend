@@ -1,11 +1,11 @@
 interface HealthToggleButtonProps {
-  isWidgetOpen: boolean;
+  healthWidget: boolean;
   onToggleWidget: () => void;
   widgetAlertLevel?: 'red' | 'yellow' | 'green' | null;
 }
 
 export function HealthToggleButton({
-  isWidgetOpen,
+  healthWidget,
   onToggleWidget,
   widgetAlertLevel = null // Oletuksena null (vihreä tai ei aktiivista hälytystä)
 }: HealthToggleButtonProps) {
@@ -15,7 +15,7 @@ export function HealthToggleButton({
       type="button"
       onClick={onToggleWidget}
       style={{
-        background: isWidgetOpen ? '#e4e4e7' : '#ffffff',
+        background: healthWidget ? '#e4e4e7' : '#ffffff',
         border: '1px solid #cbd5e1',
         borderRadius: '4px',
         padding: '4px 12px',
@@ -39,7 +39,7 @@ export function HealthToggleButton({
           boxShadow: widgetAlertLevel ? '0 0 0 2px rgba(255,255,255,0.8)' : 'none',
         }}
       />
-      {isWidgetOpen ? "Hide Health Radar" : "Show Health Radar"}
+      {healthWidget ? "Hide Health Radar" : "Show Health Radar"}
     </button>
   );
 }

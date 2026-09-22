@@ -1,17 +1,36 @@
+import { useState } from "react";
 import type { Product } from "../services/productService";
+import { cartService } from "../services/cartService";
 import { MoneyDisplay } from "./MoneyDisplay";
 
 interface ProductsWidgetProps {
   products: Product[];
   isLoading: boolean;
-  onAddToCart?: (productId: number) => void;
 }
 
 export function ProductsWidget({
   products,
   isLoading,
-  onAddToCart,
 }: ProductsWidgetProps) {
+  const [quantities, setQuantities] = useState<Record<number, number>>({});
+
+  const handleQuantityChange = (productId: number, quantity: number) => {
+    setQuantities((prev) => ({ ...prev, [productId]: Math.max(1, quantity) }));
+  };
+
+  const handleAddToCart = (product: Product) => {
+    const quantity = quantities[product.id!] || 1;
+    if (product.id) {
+      cartService.addToCart({
+        productId: product.id,
+        productName: product.name,
+        quantity,
+        priceInCents: product.price,
+      });
+      console.info("[ProductsWidget] Added to cart", { productId: product.id, quantity });
+    }
+  };
+
   return (
     <section className="products-section products-widget" aria-labelledby="products-title">
       <div className="section-heading">
@@ -45,15 +64,28 @@ export function ProductsWidget({
                 <p className="product-price">
                   <MoneyDisplay amountInCents={product.price} />
                 </p>
-                {onAddToCart && product.id && (
-                  <button
-                    className="add-to-cart-button"
-                    type="button"
-                    onClick={() => void onAddToCart(product.id!)}
-                  >
-                    Add to cart
-                  </button>
-                )}
+                <div className="product-actions">
+                  <div className="quantity-selector">
+                    <label htmlFor={`quantity-${product.id}`}>Qty:</label>
+                    <input
+                      id={`quantity-${product.id}`}
+                      type="number"
+                      min="1"
+                      value={quantities[product.id!] || 1}
+                      onChange={(e) => handleQuantityChange(product.id!, Number(e.target.value))}
+                      className="quantity-input"
+                    />
+                  </div>
+                  {product.id && (
+                    <button
+                      className="add-to-cart-button"
+                      type="button"
+                      onClick={() => handleAddToCart(product)}
+                    >
+                      Add to cart
+                    </button>
+                  )}
+                </div>
               </div>
             </article>
           ))}

@@ -193,7 +193,7 @@
 .account-header,
 .section-heading {
   display: flex;
-  align-items: flex-end;
+  align-items: center; /* <-- Muutettu: flex-end -> center */
   justify-content: space-between;
   gap: 24px;
 }
@@ -410,6 +410,11 @@
   border-radius: 8px;
   background: var(--social-bg);
   box-shadow: var(--shadow);
+}
+
+h1 {
+  line-height: 1.1;
+  margin: 0;
 }
 
 .mock-payment-panel h1 {

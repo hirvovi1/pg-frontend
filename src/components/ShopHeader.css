@@ -1,0 +1,85 @@
+/* Top toolbar */
+.quick-actions-toolbar {
+    display: flex;
+    justify-content: space-between; /* Separate left and right sides */
+    align-items: center;
+    gap: 20px;
+    padding: 6px 24px; /* Slightly lower and cleaner */
+    background: #f4f4f5;
+    border-bottom: 1px solid #e4e4e7;
+}
+
+/* Right side action group */
+.toolbar-right-group {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Tight spacing between buttons as in the design */
+}
+
+/* Buttons that copy the Health button's small and clean style */
+.view-button,
+.new-account-button {
+    padding: 4px 10px; /* Smaller, low height */
+    font-size: 13px;
+    font-weight: 500;
+    font-family: inherit;
+    border: 1px solid #ccc; /* Matches the gray border in the design */
+    border-radius: 4px;
+    background: #fff;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Active view (purple highlight like in Show Health Radar or brand) */
+.view-button.active {
+    background: #f3e8ff; /* Light purple background */
+    border-color: #d8b4fe;
+    color: #6b21a8;
+}
+
+/* + New Account stands out with brand color, but as a small version */
+.new-account-button {
+    background: var(--accent, #7c3aed);
+    border-color: var(--accent, #7c3aed);
+    color: #fff;
+    font-weight: 600;
+}
+
+.new-account-button:hover {
+    opacity: 0.9;
+}
+
+/* Currency selector scaled down to fit the toolbar */
+.global-currency-selector {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #4b5563;
+    margin-left: 8px; /* Small gap from buttons */
+}
+
+.global-currency-selector select {
+    padding: 2px 6px;
+    font-size: 13px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background: #fff;
+    cursor: pointer;
+}
+
+/* Header area (now very clean and spacious!) */
+.account-header {
+    padding: 32px 24px 12px;
+    text-align: left;
+}
+
+.dashboard-title {
+    font-size: 42px;
+    line-height: 1.1;
+    margin: 6px 0 6px 0;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #000;
+}

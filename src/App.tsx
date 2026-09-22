@@ -9,7 +9,7 @@ import { ShopApp } from "./components/ShopApp";
 function AppContent() {
   const { globalAlert } = useSystemStatus();
   const isMockPayment = window.location.pathname.startsWith('/mock-payment')
-  const [isWidgetOpen, setIsWidgetOpen] = useState(false);
+  const [healthWidget, setHealthWidget] = useState(false);
 
   let pageContent;
 
@@ -22,7 +22,7 @@ function AppContent() {
     pageContent = <MockPaymentPage transactionId={transactionId} amountInCents={amountInCents} />
   } else {
     pageContent = (
-      <ShopApp isWidgetOpen={isWidgetOpen} onToggleWidget={() => setIsWidgetOpen(prev => !prev)} />
+      <ShopApp healthWidget={healthWidget} onToggleWidget={() => setHealthWidget(prev => !prev)} />
     );
   }
 
@@ -36,7 +36,7 @@ function AppContent() {
       
       {pageContent}
 
-      <div style={{ display: isWidgetOpen ? 'block' : 'none' }}>
+      <div style={{ display: healthWidget ? 'block' : 'none' }}>
         <HealthPulseWidget />
       </div>
     </>

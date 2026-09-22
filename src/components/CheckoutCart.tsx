@@ -2,31 +2,33 @@ import { useState } from 'react'
 import type { ChangeEvent } from 'react'
 import { PENDING_TRANSACTION_STORAGE_KEY, paytrailService } from '../services/paytrailservice'
 import type { Account } from '../services/paytrailservice'
-import { useCurrency } from '../context/CurrencyContext' // Fixed relative import path
-import { MoneyDisplay } from './MoneyDisplay' // Import our helper component
-
-const CART_ITEMS = [
-  { name: 'Parsley', quantity: 1, priceInCents: 230 },
-  { name: 'Onions', quantity: 2, priceInCents: 249 },
-  { name: 'Tomatoes', quantity: 4, priceInCents: 329 },
-  { name: 'Turnips', quantity: 3, priceInCents: 179 },
-  { name: 'Broccoli', quantity: 1, priceInCents: 299 },
-  { name: 'Carrots', quantity: 6, priceInCents: 149 },
-  { name: 'Bell Peppers', quantity: 3, priceInCents: 399 },
-  { name: 'Spinach', quantity: 1, priceInCents: 279 },
-]
+import { cartService, type CartItem } from '../services/cartService'
+import { useCurrency } from '../context/CurrencyContext'
+import { MoneyDisplay } from './MoneyDisplay'
+import "./CheckoutCart.css"
 
 interface CheckoutCartProps {
   accounts: Account[]
 }
 
 function CheckoutCart({ accounts }: CheckoutCartProps) {
-  const { currency } = useCurrency() // 1. Grab global currency from Context
+  const { currency } = useCurrency()
   const [selectedBuyerId, setSelectedBuyerId] = useState('')
   const [promoCode] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-  const totalInCents = CART_ITEMS.reduce((total, item) => total + item.priceInCents * item.quantity, 0)
+  const [cartItems, setCartItems] = useState<CartItem[]>(() => cartService.getCartItems())
+  const totalInCents = cartService.getTotalInCents()
+
+  const handleQuantityChange = (productId: number, quantity: number) => {
+    cartService.updateQuantity(productId, quantity)
+    setCartItems(cartService.getCartItems())
+  }
+
+  const handleRemoveItem = (productId: number) => {
+    cartService.removeFromCart(productId)
+    setCartItems(cartService.getCartItems())
+  }
 
   const handleBuyerChange = (event: ChangeEvent<HTMLSelectElement>) => {
     setSelectedBuyerId(event.target.value)
@@ -34,10 +36,8 @@ function CheckoutCart({ accounts }: CheckoutCartProps) {
     console.info('[CheckoutCart] Buyer selected', { accountId: event.target.value })
   }
 
-  // 2. Local backup string formatter exclusively for HTML <option> texts
   const formatOptionLabel = (amountInCents: number) => {
     if (currency === 'USD') {
-      // Approximate fallback view inside native select dropdown fields (1 EUR = 1.08 USD)
       return `$${((amountInCents / 100) * 1.08).toFixed(2)} USD (est.)`
     }
     return `${(amountInCents / 100).toFixed(2)} €`
@@ -58,14 +58,9 @@ function CheckoutCart({ accounts }: CheckoutCartProps) {
 
     setError('')
     setIsLoading(true)
-    console.info('[CheckoutCart] Starting checkout', {
-      buyerAccountId: selectedBuyerId,
-      amountInCents: totalInCents,
-    })
 
     try {
       const merchantAccount = await paytrailService.ensureMerchantAccount()
-      console.info('[CheckoutCart] Merchant account ready', { accountId: merchantAccount.id })
       const idempotencyKey = crypto.randomUUID()
       const response = await paytrailService.executeTransfer({
         idempotencyKey,
@@ -73,18 +68,12 @@ function CheckoutCart({ accounts }: CheckoutCartProps) {
         accountIdTo: merchantAccount.id,
         amountInCents: totalInCents,
       })
-      console.info('[CheckoutCart] Transfer accepted', {
-        transactionId: response.transactionId,
-        idempotencyKey,
-      })
 
       if (!response.paymentUrl) {
         throw new Error('Paytrail did not provide a checkout URL.')
       }
 
       localStorage.setItem(PENDING_TRANSACTION_STORAGE_KEY, response.transactionId)
-      console.info('[CheckoutCart] Stored pending transaction', { transactionId: response.transactionId })
-      console.info('[CheckoutCart] Redirecting to payment URL', { paymentUrl: response.paymentUrl })
       window.location.assign(response.paymentUrl)
     } catch (requestError) {
       console.error('[CheckoutCart] Checkout failed', requestError)
@@ -101,27 +90,58 @@ function CheckoutCart({ accounts }: CheckoutCartProps) {
           <p className="eyebrow">Paytrail checkout</p>
           <h2 id="checkout-cart-title">Shopping Cart</h2>
         </div>
-        <span className="checkout-cart-count">{CART_ITEMS.length} items</span>
+        <span className="checkout-cart-count">{cartItems.length} items</span>
       </div>
 
       <div className="checkout-cart-items">
-        {CART_ITEMS.map((item) => (
-          <div className="checkout-cart-item" key={item.name}>
-            <div>
-              <strong>{item.name}</strong>
-              <span>{item.quantity}x</span>
+        {cartItems.length === 0 ? (
+          <p className="empty-state">Your cart is empty.</p>
+        ) : (
+          cartItems.map((item) => (
+            <div className="checkout-cart-item" key={item.productId}>
+              {/* Top row: Name on left, price + delete button on right */}
+              <div className="cart-item-top-row">
+                <span className="cart-item-name">{item.productName}</span>
+
+                <div className="cart-item-price-group">
+      <span className="cart-item-price-display">
+        <MoneyDisplay amountInCents={item.priceInCents * item.quantity} />
+      </span>
+
+                  {/* Stylish delete button */}
+                  <button
+                    type="button"
+                    disabled={isLoading}
+                    onClick={() => handleRemoveItem(item.productId)}
+                    className="remove-icon-btn"
+                    aria-label="Remove item"
+                  >
+                    <svg xmlns="http://w3.org" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="3 6 5 6 21 6"></polyline>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                      <line x1="10" y1="11" x2="10" y2="17"></line>
+                      <line x1="14" y1="11" x2="14" y2="17"></line>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              {/* Bottom row: Quantity controls on the right */}
+              <div className="cart-item-bottom-row">
+                <div className="quantity-controls">
+                  <button type="button" className="micro-btn" disabled={item.quantity <= 1 || isLoading} onClick={() => handleQuantityChange(item.productId, item.quantity - 1)}>-</button>
+                  <span className="quantity-display">{item.quantity}</span>
+                  <button type="button" className="micro-btn" disabled={isLoading} onClick={() => handleQuantityChange(item.productId, item.quantity + 1)}>+</button>
+                </div>
+              </div>
             </div>
-            {/* 3. Use MoneyDisplay for line items */}
-            <span>
-              <MoneyDisplay amountInCents={item.priceInCents * item.quantity} />
-            </span>
-          </div>
-        ))}
+
+          ))
+        )}
       </div>
 
       <div className="checkout-cart-total">
         <span>Total</span>
-        {/* 4. Use MoneyDisplay for checkout grand total */}
         <strong>
           <MoneyDisplay amountInCents={totalInCents} />
         </strong>
@@ -130,11 +150,17 @@ function CheckoutCart({ accounts }: CheckoutCartProps) {
       <label className="checkout-cart-label" htmlFor="checkout-buyer">
         Select Active Buyer Profile:
       </label>
-      <select id="checkout-buyer" value={selectedBuyerId} onChange={handleBuyerChange} disabled={isLoading}>
+      {/* Using the new modern-select class */}
+      <select
+        id="checkout-buyer"
+        className="modern-select"
+        value={selectedBuyerId}
+        onChange={handleBuyerChange}
+        disabled={isLoading}
+      >
         <option value="">Choose an account</option>
         {accounts.map((account) => (
           <option key={account.id} value={account.id}>
-            {/* 5. Dropdowns use text-only helper function */}
             {account.ownerName} - {formatOptionLabel(account.balanceInCents)}
           </option>
         ))}
