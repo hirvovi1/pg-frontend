@@ -1,0 +1,148 @@
+/* ==========================================================================
+   ProductsWidget.css - Tiivis ja tehokas rivipohjainen tuotelista
+   ========================================================================== */
+
+.products-widget {
+    box-sizing: border-box;
+    margin-top: 32px;
+    padding: 24px;
+    border: 1px solid var(--border, #e4e4e7);
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: var(--shadow);
+}
+
+/* Muutetaan grid pystysuoraksi listaksi */
+.product-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0 !important; /* Ei väliä rivien väliin, käytetään paddingia */
+    margin-top: 16px;
+}
+
+/* Yksittäinen tuoterivi (Kortti muuttuu riviksi) */
+.product-card {
+    display: flex !important;
+    flex-direction: row !important; /* Pakotetaan vaakataso */
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 12px 8px !important; /* Tiivis korkeus */
+    border-bottom: 1px solid #e4e4e7 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    transition: background-color 0.2s;
+}
+
+.product-card:hover {
+    transform: none !important; /* Poistetaan korttihypähtely */
+    background-color: #fafafa !important; /* Kevyt korostus riville */
+}
+
+/* Jos tuotteella on kuva, tehdään siitä pieni thumbnail rivin alkuun */
+.product-image {
+    width: 40px !important;
+    height: 40px !important;
+    object-fit: cover !important;
+    border-radius: 4px !important;
+    margin-bottom: 0 !important;
+    margin-right: 16px !important;
+}
+
+/* Vasen puoli: Tekstit */
+.product-card-content {
+    display: flex !important;
+    flex-direction: row !important; /* Pakotetaan tekstit ja kuvaus vierekkäin jos mahtuu */
+    align-items: center !important;
+    flex-grow: 1 !important;
+    gap: 16px;
+}
+
+.product-card h3 {
+    margin: 0 !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    color: var(--text-h, #18181b);
+    min-width: 140px; /* Pitää tuotteiden nimet samassa linjassa */
+}
+
+.product-description {
+    font-size: 13px !important;
+    color: var(--text, #71717a) !important;
+    margin: 0 !important;
+    flex-grow: 1 !important;
+}
+
+/* Oikea puoli: Hinta ja Toiminnot samalla rivillä */
+.product-right-side {
+    display: flex;
+    align-items: center;
+    gap: 24px; /* Hajurako hinnan ja nappien välille */
+}
+
+.product-price {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    color: var(--text-h, #18181b);
+    margin: 0 !important;
+    white-space: nowrap;
+    min-width: 80px;
+    text-align: right;
+}
+
+.product-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    border-top: none !important;
+    padding-top: 0 !important;
+}
+
+/* Mikronapit (Säilytetään ostoskorin siisti ilme) */
+.product-quantity-selector {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 6px !important;
+    background: #f4f4f5 !important;
+    padding: 3px 6px !important;
+    border-radius: 6px !important;
+}
+
+.product-micro-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 22px !important;
+    height: 22px !important;
+    padding: 0 !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    background: #fff !important;
+    border: 1px solid #e4e4e7 !important;
+    border-radius: 4px !important;
+    cursor: pointer !important;
+    color: #3f3f46 !important;
+}
+
+.product-quantity-display {
+    display: inline-block !important;
+    text-align: center !important;
+    min-width: 20px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #18181b !important;
+}
+
+/* Pienennetty "Add to cart" -painike riville sopivaksi */
+.add-to-cart-button {
+    padding: 5px 12px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #fff !important;
+    background: var(--accent, #7c3aed) !important;
+    border: none !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    white-space: nowrap;
+}
