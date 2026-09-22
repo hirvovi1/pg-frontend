@@ -32,6 +32,13 @@ export function ShopApp({ healthWidget, onToggleWidget }: ShopAppProps) {
   const [cartCount, setCartCount] = useState(() => cartService.getItemCount());
   const { globalAlert } = useSystemStatus();
 
+  // Close health widget if health service goes down
+  useEffect(() => {
+    if (healthWidget && globalAlert?.message.includes("Health Pulse service is unreachable")) {
+      onToggleWidget();
+    }
+  }, [globalAlert, healthWidget, onToggleWidget]);
+
   const getButtonAlertLevel = () => {
     if (!globalAlert) return "green";
     return globalAlert.severity === "critical" ? "red" : "yellow";
@@ -84,6 +91,14 @@ export function ShopApp({ healthWidget, onToggleWidget }: ShopAppProps) {
     return fetchAccounts();
   };
 
+  const handleToggleWidget = () => {
+    // Prevent opening widget if health service is down
+    if (globalAlert?.message.includes("Health Pulse service is unreachable")) {
+      return;
+    }
+    onToggleWidget();
+  };
+
   const handleDeleteAccount = async (accountId: string) => {
     console.info("[ShopApp] Deleting account", { accountId });
     setError("");
@@ -105,7 +120,7 @@ export function ShopApp({ healthWidget, onToggleWidget }: ShopAppProps) {
     <main className="account-page">
       <ShopHeader
         healthWidget={healthWidget}
-        onToggleWidget={onToggleWidget}
+        onToggleWidget={handleToggleWidget}
         widgetAlertLevel={getButtonAlertLevel()}
         currency={currency}
         onCurrencyChange={(nextCurrency) => setCurrency(nextCurrency)}

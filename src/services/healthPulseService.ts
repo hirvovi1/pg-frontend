@@ -10,9 +10,10 @@ export const healthPulseService = {
   /**
    * Avaa reaaliaikaisen Server-Sent Events (SSE) -yhteyden Health Pulse -mikropalveluun.
    * @param onMessage Callback-funktio, jota kutsutaan aina kun uusi tila saapuu.
+   * @param onError Callback-funktio, jota kutsutaan kun yhteysvirhe tapahtuu.
    * @returns Funktio, jota kutsumalla striimi saadaan suljettua siististi.
    */
-  subscribeToPulse(onMessage: (data: TelemetryEvent) => void): () => void {
+  subscribeToPulse(onMessage: (data: TelemetryEvent) => void, onError?: () => void): () => void {
     const eventSource = new EventSource(`${PULSE_API_BASE}/stream`)
 
     eventSource.onmessage = (event) => {
@@ -26,6 +27,10 @@ export const healthPulseService = {
 
     eventSource.onerror = (err) => {
       console.error('[HealthPulseService] SSE stream connection lost or errored', err)
+      eventSource.close()
+      if (onError) {
+        onError()
+      }
     }
 
     // Palautetaan sulkemismetodi unmount-tilanteita varten
