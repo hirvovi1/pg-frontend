@@ -5,7 +5,7 @@ test('creates an account with a whale promo code', async ({ page }) => {
   await page.getByRole('button', { name: 'Products', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Products' })).toBeVisible();
 
-  await page.getByRole('button', { name: 'Cart', exact: true }).click();
+  await page.getByRole('button', { name: /^Cart/ }).click();
   await expect(page.getByRole('heading', { name: 'Shopping Cart' })).toBeVisible();
 
   await page.getByRole('button', { name: 'Accounts', exact: true }).click();
@@ -44,7 +44,7 @@ test('switches global currency and fetches values from the currency microservice
   const firstAddToCartButton = page.getByRole('button', { name: 'Add to cart' }).first();
   await firstAddToCartButton.click();
 
-  await page.getByRole('button', { name: 'Cart', exact: true }).click();
+  await page.getByRole('button', { name: /^Cart/ }).click();
   await expect(page.locator('.checkout-cart-item')).toBeVisible();
 
   await page.getByRole('button', { name: 'Accounts', exact: true }).click();

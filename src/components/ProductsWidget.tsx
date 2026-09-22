@@ -14,10 +14,8 @@ export function ProductsWidget({
                                  isLoading,
                                }: ProductsWidgetProps) {
   const [quantities, setQuantities] = useState<Record<number, number>>({});
-
-  const handleQuantityChange = (productId: number, quantity: number) => {
-    setQuantities((prev) => ({ ...prev, [productId]: Math.max(1, quantity) }));
-  };
+// 1. Lisää uusi tila (state) komponentin alkuun trackaamaan "Added"-efektiä
+  const [addedProductId, setAddedProductId] = useState<number | null>(null);
 
   const handleAddToCart = (product: Product) => {
     const quantity = quantities[product.id!] || 1;
@@ -30,11 +28,17 @@ export function ProductsWidget({
       });
       console.info("[ProductsWidget] Added to cart", { productId: product.id, quantity });
 
-      // Nollataan määrä takaisin ykköseen onnistuneen lisäyksen jälkeen feng shuin vuoksi
+      setAddedProductId(product.id);
       setQuantities((prev) => ({ ...prev, [product.id!]: 1 }));
+      setTimeout(() => {
+        setAddedProductId(null);
+      }, 1200);
     }
   };
 
+  const handleQuantityChange = (productId: number, quantity: number) => {
+    setQuantities((prev) => ({ ...prev, [productId]: Math.max(1, quantity) }));
+  };
 
   return (
     <section className="products-section products-widget" aria-labelledby="products-title">
@@ -91,13 +95,15 @@ export function ProductsWidget({
 
                     {product.id && (
                       <button
-                        className="add-to-cart-button"
+                        className={`add-to-cart-button ${product.id === addedProductId ? 'success-pulse' : ''}`}
                         type="button"
+                        disabled={product.id === addedProductId} // Lukitaan sekunniksi, ettei tule tuplaklikkauksia
                         onClick={() => handleAddToCart(product)}
                       >
-                        Add to cart
+                        {product.id === addedProductId ? 'Added! ✓' : 'Add to cart'}
                       </button>
                     )}
+
                   </div>
                 </div>
               </article>

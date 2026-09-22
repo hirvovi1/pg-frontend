@@ -22,7 +22,7 @@ test.describe("Checkout Flow", () => {
     await page.getByRole("button", { name: "Add to cart" }).first().click();
 
     // Navigate to cart
-    await page.getByRole("button", { name: "Cart", exact: true }).click();
+    await page.getByRole("button", { name: /^Cart/ }).click();
 
     // Select the account
     const option = page.locator("select#checkout-buyer option").filter({ hasText: uniqueName });
@@ -51,7 +51,7 @@ test.describe("Checkout Flow", () => {
     await page.getByRole("button", { name: "Add to cart" }).first().click();
 
     // Navigate to cart
-    await page.getByRole("button", { name: "Cart", exact: true }).click();
+    await page.getByRole("button", { name: /^Cart/ }).click();
     await page.getByRole("button", { name: "Proceed to Paytrail Checkout" }).click();
 
     await expect(page.getByText("Select an active buyer profile before continuing.")).toBeVisible();

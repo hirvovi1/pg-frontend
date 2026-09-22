@@ -1,5 +1,5 @@
 /* ==========================================================================
-   ProductsWidget.css - Tiivis ja tehokas rivipohjainen tuotelista
+   ProductsWidget.css - Compact and efficient row-based product list
    ========================================================================== */
 
 .products-widget {
@@ -145,4 +145,19 @@
     border-radius: 6px !important;
     cursor: pointer !important;
     white-space: nowrap;
+}
+
+/* Onnistuneen lisäyksen tyyli painikkeelle */
+.add-to-cart-button.success-pulse {
+    background: #10b981 !important; /* Kaunis Paytrail/pankki-vihreä */
+    border-color: #10b981 !important;
+    color: #fff !important;
+    animation: buttonScaleUp 0.2s ease-out;
+}
+
+/* Pieni tyylikäs sykäys-animaatio */
+@keyframes buttonScaleUp {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
 }

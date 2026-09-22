@@ -41,6 +41,7 @@ export const cartService = {
     }
 
     this.saveCartItems(items)
+    window.dispatchEvent(new Event('cart-updated'))
   },
 
   /**
@@ -57,6 +58,7 @@ export const cartService = {
         items[index].quantity = quantity
       }
       this.saveCartItems(items)
+      window.dispatchEvent(new Event('cart-updated'))
     }
   },
 
@@ -66,6 +68,7 @@ export const cartService = {
   removeFromCart(productId: number): void {
     const items = this.getCartItems().filter((i) => i.productId !== productId)
     this.saveCartItems(items)
+    window.dispatchEvent(new Event('cart-updated'))
   },
 
   /**
@@ -73,6 +76,7 @@ export const cartService = {
    */
   clearCart(): void {
     localStorage.removeItem(CART_STORAGE_KEY)
+    window.dispatchEvent(new Event('cart-updated'))
   },
 
   /**

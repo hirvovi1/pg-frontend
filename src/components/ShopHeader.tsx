@@ -3,6 +3,7 @@ import "./ShopHeader.css";
 
 type View = 'accounts' | 'cart' | 'products';
 
+
 interface ShopHeaderProps {
   healthWidget: boolean;
   onToggleWidget: () => void;
@@ -12,6 +13,7 @@ interface ShopHeaderProps {
   currentView: View;
   onViewChange: (view: View) => void;
   onCreateAccount: () => void;
+  cartCount: number;
 }
 
 export function ShopHeader({
@@ -23,9 +25,9 @@ export function ShopHeader({
                              currentView,
                              onViewChange,
                              onCreateAccount,
+                             cartCount,
                            }: ShopHeaderProps) {
 
-  // 1. Määritellään dynaamiset tekstit jokaiselle näkymälle
   const welcomeTexts: Record<View, string> = {
     accounts: "Register and manage global Webstable store customer accounts.",
     cart: "Review your selected items and proceed to secure checkout.",
@@ -49,13 +51,16 @@ export function ShopHeader({
           >
             Accounts
           </button>
+
+          {/* Updated button: Shows dynamic cart count */}
           <button
             className={`view-button ${currentView === 'cart' ? 'active' : ''}`}
             type="button"
             onClick={() => onViewChange('cart')}
           >
-            Cart
+            Cart ({cartCount})
           </button>
+
           <button
             className={`view-button ${currentView === 'products' ? 'active' : ''}`}
             type="button"

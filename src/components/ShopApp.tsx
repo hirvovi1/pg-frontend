@@ -3,6 +3,7 @@ import type { Account } from "../services/paytrailservice";
 import { paytrailService } from "../services/paytrailservice";
 import type { Product } from "../services/productService";
 import { productService } from "../services/productService";
+import { cartService } from "../services/cartService";
 import { useCurrency } from "../context/CurrencyContext";
 import { useSystemStatus } from "../context/SystemStatusContext";
 import CheckoutCartWidget from "./CheckoutCart.tsx";
@@ -28,6 +29,7 @@ export function ShopApp({ healthWidget, onToggleWidget }: ShopAppProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentView, setCurrentView] = useState<View>('accounts');
   const [deletingAccountId, setDeletingAccountId] = useState<string | null>(null);
+  const [cartCount, setCartCount] = useState(() => cartService.getItemCount());
   const { globalAlert } = useSystemStatus();
 
   const getButtonAlertLevel = () => {
@@ -68,6 +70,15 @@ export function ShopApp({ healthWidget, onToggleWidget }: ShopAppProps) {
     void Promise.resolve().then(fetchProducts);
   }, []);
 
+  useEffect(() => {
+    const handleCartChange = () => {
+      setCartCount(cartService.getItemCount());
+    };
+
+    window.addEventListener('cart-updated', handleCartChange);
+    return () => window.removeEventListener('cart-updated', handleCartChange);
+  }, []);
+
   const refreshAccounts = () => {
     console.info("[ShopApp] Refreshing accounts after account creation");
     return fetchAccounts();
@@ -101,6 +112,7 @@ export function ShopApp({ healthWidget, onToggleWidget }: ShopAppProps) {
         currentView={currentView}
         onViewChange={setCurrentView}
         onCreateAccount={() => setIsModalOpen(true)}
+        cartCount={cartCount}
       />
 
       {error && !isModalOpen && (
