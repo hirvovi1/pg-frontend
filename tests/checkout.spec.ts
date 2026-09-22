@@ -14,6 +14,24 @@ test.describe("Checkout Flow", () => {
     (page as any).uniqueName = uniqueName;
   });
 
+  test.afterEach(async ({ page }) => {
+    // Clean up the account created in beforeEach
+    const uniqueName = (page as any).uniqueName;
+    if (uniqueName) {
+      await page.goto('/');
+      await page.getByRole('button', { name: 'Accounts', exact: true }).click();
+      const accountCard = page.getByRole('article').filter({ hasText: uniqueName });
+      try {
+        const deleteButton = accountCard.getByRole('button', { name: 'Delete account' });
+        if (await deleteButton.isVisible()) {
+          await deleteButton.click();
+        }
+      } catch {
+        // Account might not exist or already deleted
+      }
+    }
+  });
+
   test("successfully completes the checkout flow to mock payment page", async ({ page }) => {
     const uniqueName = (page as any).uniqueName;
 

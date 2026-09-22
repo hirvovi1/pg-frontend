@@ -1,5 +1,23 @@
 import { test, expect } from '@playwright/test';
 
+test.afterEach(async ({ page }) => {
+  // Clean up any accounts created during tests
+  await page.goto('/');
+  const articles = page.getByRole('article');
+  const count = await articles.count();
+  for (let i = 0; i < count; i++) {
+    const article = articles.nth(i);
+    try {
+      const deleteButton = article.getByRole('button', { name: 'Delete account' });
+      if (await deleteButton.isVisible()) {
+        await deleteButton.click();
+      }
+    } catch {
+      // Account might not have delete button or already deleted
+    }
+  }
+});
+
 test('creates an account with a whale promo code', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Products', exact: true }).click();
@@ -19,8 +37,7 @@ test('creates an account with a whale promo code', async ({ page }) => {
 
   const accountCard = page.getByRole('article').filter({ hasText: 'Seppäilyrahasto' });
   await expect(accountCard).toBeVisible();
-  await accountCard.getByRole('button', { name: 'Delete account' }).click();
-  await expect(accountCard).toBeHidden();
+  // Cleanup handled by afterEach
 });
 
 test('switches global currency and fetches values from the currency microservice', async ({ page }) => {
@@ -51,4 +68,5 @@ test('switches global currency and fetches values from the currency microservice
 
   await exactTargetCard.getByRole('button', { name: 'Delete account' }).click();
   await expect(exactTargetCard).toBeHidden();
+  // Cleanup handled by afterEach
 });
