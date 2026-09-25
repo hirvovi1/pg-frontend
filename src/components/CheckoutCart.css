@@ -1,266 +1,252 @@
 /* ==========================================================================
-   CheckoutCart.css - Final cleaned version
+   CheckoutCart.css - Structured Desktop Dashboard Layout
    ========================================================================== */
 
-/* Main cart container */
+/* Pääkontti */
 .checkout-cart {
-    width: min(100%, 650px);
+    width: 850px;
+    max-width: 100%;
     box-sizing: border-box;
-    padding: 24px;
+    padding: 32px;
     border: 1px solid var(--accent-border, #d8b4fe);
     border-radius: 12px;
     background: #fff;
     text-align: left;
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+    margin: 40px auto;
+
+    /* Varmistetaan, että pääkontti asettaa ryhmät allekkain, ei vierekkäin */
+    display: flex;
+    flex-direction: column;
 }
 
-/* Header section */
+/* Otsikkorivi */
 .checkout-cart-heading {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
+    border-bottom: 2px solid #f4f4f5;
+    padding-bottom: 16px;
 }
 
 .checkout-cart-heading h2 {
-    margin: 4px 0 0 0;
-    font-size: 24px;
-    color: var(--text-h, #18181b);
+    margin: 0;
+    font-size: 26px;
+    color: #18181b;
 }
 
 .checkout-cart-count {
     font-size: 14px;
     color: #71717a;
-    font-family: var(--mono);
+    font-family: monospace;
 }
 
-/* Empty cart state */
-.empty-state {
-    padding: 24px 0;
-    color: #71717a;
-    text-align: center;
-    font-style: italic;
-}
-
-/* Cart items */
+/* Tuotelistan säiliö */
 .checkout-cart-items {
     display: flex;
     flex-direction: column;
 }
 
-/* Product row frame (resets external flexbox conflicts) */
+/* YKSITTÄINEN TUOTERIVI - Täydellinen suora linja */
 .checkout-cart-item {
-    display: block !important;
-    padding: 16px 0 !important;
-    border-top: 1px solid #e4e4e7 !important;
-    text-align: left !important;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 0;
+    border-bottom: 1px solid #e4e4e7;
+    gap: 32px;
 }
 
 .checkout-cart-item:last-of-type {
-    border-bottom: 1px solid #e4e4e7 !important;
-}
-
-/* Top row: Name on left, price + delete button on right */
-.cart-item-top-row {
-    display: block !important;
-    margin-bottom: 12px !important;
-    clear: both !important;
+    border-bottom: 2px solid #18181b;
 }
 
 .cart-item-name {
-    float: left !important;
-    font-weight: 600 !important;
-    color: #18181b !important;
-    font-size: 15px !important;
+    font-weight: 600;
+    color: #18181b;
+    font-size: 16px;
+    flex: 1;
 }
 
-/* Group price and delete button neatly on the right */
-.cart-item-price-group {
-    float: right !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 12px !important;
+/* Oikean reunan ryhmä: Hinta ja säätimet rinnakkain */
+.cart-item-actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 24px;
 }
 
 .cart-item-price-display {
-    font-weight: 700 !important;
-    color: #18181b !important;
-    font-size: 15px !important;
+    font-weight: 700;
+    color: #18181b;
+    font-size: 16px;
+    white-space: nowrap;
+    text-align: right;
+    min-width: 90px;
 }
 
-/* Modern, unobtrusive delete button */
-.remove-icon-btn {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    background: none !important;
-    border: none !important;
-    color: #a1a1aa !important;
-    cursor: pointer !important;
-    padding: 4px !important;
-    border-radius: 4px !important;
-    transition: all 0.2s ease !important;
-}
-
-/* Hover state: delete button turns red */
-.remove-icon-btn:hover:not(:disabled) {
-    color: #ef4444 !important;
-    background-color: #fef2f2 !important;
-}
-
-.remove-icon-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* Bottom row: Quantity controls on the right under price */
-.cart-item-bottom-row {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: flex-end !important;
-    clear: both !important;
-    padding-top: 6px !important;
-    width: 100% !important;
-}
-
-/* Gray background panel for quantity controls */
+/* Määränapit vaakarivissä */
 .quantity-controls {
-    display: inline-flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    gap: 6px !important;
-    background: #f4f4f5 !important;
-    padding: 3px 6px !important;
-    border-radius: 6px !important;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    background: #f4f4f5;
+    padding: 4px 8px;
+    border-radius: 6px;
 }
 
 .micro-btn {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 22px !important;
-    height: 22px !important;
-    padding: 0 !important;
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    background: #fff !important;
-    border: 1px solid #e4e4e7 !important;
-    border-radius: 4px !important;
-    cursor: pointer !important;
-    color: #3f3f46 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    font-size: 15px;
+    font-weight: 600;
+    background: #fff;
+    border: 1px solid #e4e4e7;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #3f3f46;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .micro-btn:hover:not(:disabled) {
-    background: #fff !important;
-    border-color: #a1a1aa !important;
+    border-color: #a1a1aa;
+    color: #7c3aed;
 }
 
 .micro-btn:disabled {
-    opacity: 0.5;
+    opacity: 0.4;
     cursor: not-allowed;
 }
 
 .quantity-display {
-    display: inline-block !important;
-    text-align: center !important;
-    min-width: 20px !important;
-    font-size: 13px !important;
-    font-weight: 700 !important;
-    color: #18181b !important;
+    text-align: center;
+    min-width: 24px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #18181b;
 }
 
-/* Total sum */
+.remove-icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: #fafafa;
+    border: 1px solid #e4e4e7;
+    color: #71717a;
+    cursor: pointer;
+    border-radius: 6px;
+}
+
+/* LOPPUSUMMA - Korjattu space-betweeniksi ja annettu oma rivi */
 .checkout-cart-total {
     display: flex;
+    flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    margin: 24px 0;
-    font-size: 16px;
+    margin: 32px 0 24px 0;
+    padding: 20px 0;
+    border-top: 1px solid #e4e4e7;
+    width: 100%;
 }
 
 .checkout-cart-total span {
-    font-weight: 500;
+    font-weight: 600;
+    font-size: 18px;
     color: #3f3f46;
 }
 
 .checkout-cart-total strong {
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--accent, #7c3aed);
+    font-size: 24px;
+    font-weight: 800;
+    color: #7c3aed; /* 💡 Muutettu suoraksi väriksi */
 }
 
-/* Buyer profile selector */
+.checkout-cart-button {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 14px 20px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    background: #7c3aed; /* 💡 Muutettu suoraksi väriksi */
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+    text-align: center;
+}
+
+.checkout-cart-button:hover:not(:disabled) {
+    background: #6d28d9; /* Lisätään kiva hover-efekti kaupan päälle */
+}
+
+/* Erillinen lohko profiilivalinnalle */
+.checkout-profile-section {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
 .checkout-cart-label {
-    display: block;
     font-size: 14px;
     font-weight: 600;
     margin-bottom: 8px;
     color: #18181b;
 }
 
+/* Moderni select-valikko omalla täydellä rivillään */
 .modern-select {
+    box-sizing: border-box;
     width: 100%;
-    padding: 10px 12px;
-    font-size: 14px;
-    font-family: inherit;
+    padding: 12px 16px;
+    font-size: 15px;
     border: 1px solid #e4e4e7;
     border-radius: 8px;
     background-color: #fff;
     color: #18181b;
     cursor: pointer;
-    appearance: none; /* Removes browser default arrow */
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://w3.org' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    background-size: 16px;
-    padding-right: 40px;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
 }
 
-.modern-select:focus {
-    outline: none;
-    border-color: var(--accent-border, #d8b4fe);
-    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
-}
-
-.modern-select:disabled {
-    background: #f4f4f5;
-    cursor: not-allowed;
-}
-
-/* Error messages */
-.message.error {
-    margin: 0 0 16px 0;
-    padding: 10px 12px;
-    background: #fdeaea;
-    color: #a12727;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 500;
-}
-
-/* Paytrail checkout button */
-.checkout-cart-button {
+/* Erillinen lohko painikkeelle */
+.checkout-action-section {
+    display: flex;
+    flex-direction: column;
     width: 100%;
-    padding: 12px 16px;
-    font-size: 15px;
-    font-weight: 600;
+    margin-top: 12px;
+}
+
+/* Tyylikäs ja leveä Paytrail-painike */
+.checkout-cart-button {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 14px 20px;
+    font-size: 16px;
+    font-weight: 700;
     color: #fff;
     background: var(--accent, #7c3aed);
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    transition: opacity 0.2s;
+    transition: background 0.2s;
+    text-align: center;
 }
 
-.checkout-cart-button:hover:not(:disabled) {
-    opacity: 0.9;
-}
-
-.checkout-cart-button:disabled {
-    background: #a1a1aa;
-    cursor: not-allowed;
+.message.error {
+    margin: 12px 0;
+    padding: 12px 16px;
+    background: #fdeaea;
+    color: #a12727;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
 }
