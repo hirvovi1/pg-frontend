@@ -3,7 +3,7 @@ on:
   push:
     branches: [ main, test-ci-sandbox, dev ]
   pull_request:
-    branches: [ main, test-ci-sandbox, dev ]
+    branches: [ ]
 
 jobs:
   test:
