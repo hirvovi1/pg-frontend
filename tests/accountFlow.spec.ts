@@ -24,6 +24,8 @@ test('creates an account with a whale promo code', async ({page}) => {
     (page as any).uniqueName = uniqueName; // Tallennetaan afterEachia varten!
 
     await page.goto('/');
+    await expect(page.getByRole('button', { name: 'Products', exact: true })).toBeVisible();
+
     await page.getByRole('button', {name: 'Products', exact: true}).click();
     await expect(page.getByRole('heading', {name: 'Products'})).toBeVisible();
 
