@@ -4,7 +4,8 @@ test.describe("Checkout Flow", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
     // Create a unique account to use for checkout
-    const uniqueName = `Tester ${Date.now()}`;
+    const uniqueName = `Tester-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+
     await page.getByRole("button", { name: "+ New Account" }).click();
     await page.getByRole("textbox", { name: "Account owner" }).fill(uniqueName);
     await page.getByRole("button", { name: "Create account" }).click();
@@ -54,13 +55,25 @@ test.describe("Checkout Flow", () => {
     await expect(page).toHaveURL(/\/mock-payment\//);
     await expect(page.getByRole("heading", { name: "Complete your payment" })).toBeVisible();
 
+    // 1. Haetaan paluunappi muuttujaan
+    const returnButton = page.getByRole("button", { name: "Return to shop" });
+
+    // 2. KORJAUS: Odotetaan, että taustapollaus muuttaa tilan SUCCESS-muotoon ja nappi aktivoituu
+    await expect(returnButton).toBeEnabled({ timeout: 10000 });
+
+    // 3. Klikataan vasta nyt
     // Complete payment
-    await page.getByRole("button", { name: "Return to shop" }).click();
+    await returnButton.click();
+
 
     // Should be back on the shop app
     await expect(page).not.toHaveURL(/\/mock-payment\//);
     await page.getByRole("button", { name: "Accounts", exact: true }).click();
-    await expect(page.getByRole("article").filter({ hasText: uniqueName })).toBeVisible();
+
+    // Korvaa testin viimeinen rivi tällä:
+    await expect(
+        page.getByRole("article").filter({ hasText: uniqueName })
+    ).toBeVisible({ timeout: 15000 });
   });
 
   test("shows error when proceeding without selecting an account", async ({ page }) => {
