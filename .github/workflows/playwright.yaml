@@ -2,8 +2,6 @@ name: Playwright Tests
 on:
   push:
     branches: [ main, test-ci-sandbox, dev ]
-  pull_request:
-    branches: [ ]
 
 jobs:
   test:
@@ -29,7 +27,6 @@ jobs:
         repository: 'hirvovi1/pg-backend-platform'
         ref: ${{ (github.ref_name == 'dev' || github.base_ref == 'dev') && 'dev' || 'main' }}
         path: pg-backend-platform
-
 
     # 4. Set up JDK 25 environment so the monorepo can execute ./mvnw safely
     - name: Set up JDK 25
@@ -98,6 +95,8 @@ jobs:
 
           wait_for_service "Core Backend API" "http://localhost:8080/accounts"
           wait_for_service "Health Pulse monitor" "http://localhost:8095/api/pulse/stream"
+          wait_for_service "Micro Service Facade carts" "http://localhost:8091/api/v1/frontend/carts"
+          wait_for_service "Micro Service Facade carts" "http://localhost:8091/api/v1/frontend/products"
           echo "Entire cluster network mesh is active and responding!"
 
     # 9. Dump execution environment states on failures
@@ -136,7 +135,6 @@ jobs:
     - name: Stop Core Backend containers
       if: always()
       run: docker compose -f pgapi/compose.yaml down
-
 
     # 13. Save output artifact trace packages
     - name: Upload Playwright report
