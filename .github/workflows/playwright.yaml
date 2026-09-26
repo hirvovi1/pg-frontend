@@ -64,6 +64,7 @@ jobs:
         run: npx playwright install --with-deps
 
       # 11. Execute E2E Suite against the full live mesh
+      # Drum roll please!
       - name: Run Playwright tests
         run: npm run test:e2e:ci
         env:
