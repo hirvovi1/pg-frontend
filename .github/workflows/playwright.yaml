@@ -8,61 +8,55 @@ jobs:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
-    # 1. Pull the React frontend code (this repository)
-    - name: Checkout frontend
-      uses: actions/checkout@v4
+      - name: Collect Workflow Telemetry
+        uses: catchpoint/workflow-telemetry-action@v2
 
-    # 2. Pull Core Java Backend (Port 8080 & H2)
-    - name: Checkout core backend api
-      uses: actions/checkout@v4
-      with:
-        repository: 'hirvovi1/pgapi'
-        ref: ${{ (github.ref_name == 'dev' || github.base_ref == 'dev') && 'dev' || 'main' }}        
-        path: pgapi
+      # 1. Pull the React frontend code (this repository)
+      - name: Checkout frontend
+        uses: actions/checkout@v7
 
-    # 3. Pull Microservice Monorepo (Port 8090 & 8095)
-    - name: Checkout microservices monorepo
-      uses: actions/checkout@v4
-      with:
-        repository: 'hirvovi1/pg-backend-platform'
-        ref: ${{ (github.ref_name == 'dev' || github.base_ref == 'dev') && 'dev' || 'main' }}
-        path: pg-backend-platform
+      # 2. Pull Core Java Backend (Port 8080 & H2)
+      - name: Checkout core backend api
+        uses: actions/checkout@v7
+        with:
+          repository: 'hirvovi1/pgapi'
+          ref: ${{ (github.ref_name == 'dev' || github.base_ref == 'dev') && 'dev' || 'main' }}
+          path: pgapi
 
-    # 4. Set up JDK 25 environment so the monorepo can execute ./mvnw safely
-    - name: Set up JDK 25
-      uses: actions/setup-java@v4
-      with:
-        java-version: '25'
-        distribution: 'temurin'
-        cache: 'maven'
-        
-    # 5. Create a shared Docker network for inter-container communication    
-    - name: Create Shared Docker Network with Labels
-      run: |
-        docker network create \
-          --label "com.docker.compose.network=mock-payment-network" \
-          mock-payment-network
+      # 3. Pull Microservice Monorepo (Port 8090 & 8095)
+      - name: Checkout microservices monorepo
+        uses: actions/checkout@v7
+        with:
+          repository: 'hirvovi1/pg-backend-platform'
+          ref: ${{ (github.ref_name == 'dev' || github.base_ref == 'dev') && 'dev' || 'main' }}
+          path: pg-backend-platform
 
-    # 6. Start Core Backend Engine (Port 8080)
-    - name: Start Core Backend Engine
-      run: |
-        REACTOR_NETTY_IO_WORKER_COUNT="16" \
-        REACTOR_NETTY_IO_SELECT_COUNT="16" \
-        JAVA_TOOL_OPTIONS="-Dio.netty.eventLoopThreads=16" \
-        docker compose -f pgapi/compose.yaml up --build -d
+      # 4. Set up JDK 25 environment so the monorepo can execute ./mvnw safely
+      - name: Set up JDK 25
+        uses: actions/setup-java@v6
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: 'maven'
 
-    # 7. Start Microservices Stack (Ports 8090 & 8095)
-    - name: Start Microservices Stack
-      run: |
-        MICRONAUT_SERVER_NETTY_WORKER_THREADS="16" \
-        MICRONAUT_SERVER_NETTY_PARENT_THREADS="4" \
-        MICRONAUT_CLIENT_NETTY_WORKER_THREADS="16" \
-        JAVA_TOOL_OPTIONS="-Dio.netty.eventLoopThreads=16" \
-        docker compose -f pg-backend-platform/docker-compose.yaml up --build -d
+      # 5. Create a shared Docker network for inter-container communication
+      - name: Create Shared Docker Network with Labels
+        run: |
+          docker network create \
+            --label "com.docker.compose.network=mock-payment-network" \
+            mock-payment-network
 
-      # 8. Comprehensive Cluster Health Verification
-    - name: Wait for All Services to be ready
-      run: |
+      # 6. Start Core Backend Engine (Port 8080)
+      - name: Start Core Backend Engine
+        run: docker compose -f pgapi/compose.yaml up --build -d
+
+      # 7. Start Microservices Stack (Ports 8090 & 8095)
+      - name: Start Microservices Stack
+        run: docker compose -f pg-backend-platform/docker-compose.yaml up --build -d
+
+        # 8. Comprehensive Cluster Health Verification
+      - name: Wait for All Services to be ready
+        run: |
           set -euo pipefail
 
           wait_for_service() {
@@ -99,48 +93,48 @@ jobs:
           wait_for_service "Micro Service Facade pproducts" "http://localhost:8091/api/v1/frontend/products"
           echo "Entire cluster network mesh is active and responding!"
 
-    # 9. Dump execution environment states on failures
-    - name: Dump Core Backend logs on failure
-      if: always()
-      run: docker compose -f pgapi/compose.yaml logs
+      # 9. Dump execution environment states on failures
+      - name: Dump Core Backend logs on failure
+        if: always()
+        run: docker compose -f pgapi/compose.yaml logs
 
-    - name: Dump Microservices logs on failure
-      if: always()
-      run: docker compose -f pg-backend-platform/docker-compose.yaml logs
-    
-    # 10. Node setup and dependency injection execution
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 24
-        cache: 'npm'
+      - name: Dump Microservices logs on failure
+        if: always()
+        run: docker compose -f pg-backend-platform/docker-compose.yaml logs
 
-    - name: Install dependencies
-      run: npm ci
+      # 10. Node setup and dependency injection execution
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: 'npm'
 
-    - name: Install Playwright Browsers
-      run: npx playwright install --with-deps
+      - name: Install dependencies
+        run: npm ci
 
-    # 11. Execute E2E Suite against the full live mesh
-    - name: Run Playwright tests
-      run: npx playwright test --workers=1
-      env:
-        REACT_APP_API_URL: http://localhost:8080
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
 
-    # 12. Graceful cluster cleanup
-    - name: Stop Microservices containers
-      if: always()
-      run: docker compose -f pg-backend-platform/docker-compose.yaml down
+      # 11. Execute E2E Suite against the full live mesh
+      - name: Run Playwright tests
+        run: npx playwright test --workers=1
+        env:
+          REACT_APP_API_URL: http://localhost:8080
 
-    - name: Stop Core Backend containers
-      if: always()
-      run: docker compose -f pgapi/compose.yaml down
+      # 12. Graceful cluster cleanup
+      - name: Stop Microservices containers
+        if: always()
+        run: docker compose -f pg-backend-platform/docker-compose.yaml down
 
-    # 13. Save output artifact trace packages
-    - name: Upload Playwright report
-      if: ${{ !cancelled() }}
-      uses: actions/upload-artifact@v4
-      with:
-        name: playwright-report
-        path: playwright-report/
-        retention-days: 3
+      - name: Stop Core Backend containers
+        if: always()
+        run: docker compose -f pgapi/compose.yaml down
+
+      # 13. Save output artifact trace packages
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 3
