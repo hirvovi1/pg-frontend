@@ -29,7 +29,7 @@ export function ProductsWidget({
         productId: product.id,
         productName: product.name,
         itemCount: quantity,
-        priceInCents: product.price,
+        priceInCents: product.priceInCents,
       });
       console.info("[ProductsWidget] Added to cart", { productId: product.id, quantity });
 
@@ -75,7 +75,7 @@ export function ProductsWidget({
 
                 <div className="product-right-side">
                   <p className="product-price">
-                    <MoneyDisplay amountInCents={product.price} />
+                    <MoneyDisplay amountInCents={product.priceInCents} />
                   </p>
 
                   <div className="product-actions">
