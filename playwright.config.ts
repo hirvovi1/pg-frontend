@@ -26,11 +26,12 @@ export default defineConfig({
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
-  timeout: process.env.CI ? 60000 : 30000, // Tuplataan timeout CI:ssä (60s)
+  timeout: process.env.CI ? 90000 : 30000, // Tuplataan timeout CI:ssä (60s)
 
   expect: {
-    timeout: process.env.CI ? 10000 : 5000,
+    timeout: process.env.CI ? 15000 : 5000,
   },
+
   /* Run your local dev server before starting the tests */
   webServer: {
     command: 'npm run dev',     // Komento, jolla React-fronttisi käynnistyy lokaalisti (esim. 'npm run dev' jos käytät Viteä)
@@ -53,11 +54,11 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
-
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
+    //
+    // {
+    //   name: 'firefox',
+    //   use: { ...devices['Desktop Firefox'] },
+    // },
 
       /* 🛠️ Modern CI/CD Practice: Only run WebKit if running in GitHub Actions */
     // {

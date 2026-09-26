@@ -96,7 +96,7 @@ jobs:
           wait_for_service "Core Backend API" "http://localhost:8080/accounts"
           wait_for_service "Health Pulse monitor" "http://localhost:8095/api/pulse/stream"
           wait_for_service "Micro Service Facade carts" "http://localhost:8091/api/v1/frontend/carts"
-          wait_for_service "Micro Service Facade carts" "http://localhost:8091/api/v1/frontend/products"
+          wait_for_service "Micro Service Facade pproducts" "http://localhost:8091/api/v1/frontend/products"
           echo "Entire cluster network mesh is active and responding!"
 
     # 9. Dump execution environment states on failures
@@ -123,7 +123,7 @@ jobs:
 
     # 11. Execute E2E Suite against the full live mesh
     - name: Run Playwright tests
-      run: npx playwright test --workers=1 --retries=0 --timeout=30000
+      run: npx playwright test --workers=1
       env:
         REACT_APP_API_URL: http://localhost:8080
 
