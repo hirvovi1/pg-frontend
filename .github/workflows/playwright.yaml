@@ -38,6 +38,10 @@ jobs:
           java-version: '25'
           distribution: 'temurin'
           cache: 'maven'
+          cache-dependency-path: |
+            pgapi/pom.xml
+            pg-backend-platform/**/pom.xml
+      
 
       # 5. Create a shared Docker network for inter-container communication
       - name: Create Shared Docker Network with Labels
