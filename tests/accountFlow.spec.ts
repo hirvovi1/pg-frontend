@@ -1,4 +1,4 @@
-import { test, expect } from './fixtures';
+import { test, expect } from '@playwright/test';
 
 test('creates an account with a whale promo code', async ({page}) => {
     // 1. Luodaan uniikki nimi tälle testille (tai haetaan jos beforeEach asetti sen)
