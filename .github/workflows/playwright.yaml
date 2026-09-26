@@ -1,7 +1,7 @@
 name: Playwright Tests
 on:
   push:
-    branches: [ main, test-ci-sandbox, dev ]
+    branches: [ main, test-ci-sandbox, dev, ci_test_dev ]
 
 jobs:
   test:
@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           repository: 'hirvovi1/pgapi'
-          ref: ${{ (github.ref_name == 'dev' || github.base_ref == 'dev') && 'dev' || 'main' }}
+          ref: ${{ (github.ref_name == 'main' || github.ref_name == 'master' || github.base_ref == 'main' || github.base_ref == 'master') && 'main' || 'dev' }}
           path: pgapi
 
       # 3. Pull Microservice Monorepo (Port 8090 & 8095)
@@ -28,7 +28,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           repository: 'hirvovi1/pg-backend-platform'
-          ref: ${{ (github.ref_name == 'dev' || github.base_ref == 'dev') && 'dev' || 'main' }}
+          ref: ${{ (github.ref_name == 'main' || github.ref_name == 'master' || github.base_ref == 'main' || github.base_ref == 'master') && 'main' || 'dev' }}
           path: pg-backend-platform
 
       # 4. Set up JDK 25 environment so the monorepo can execute ./mvnw safely
