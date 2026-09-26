@@ -32,20 +32,9 @@ export default defineConfig({
     timeout: process.env.CI ? 15000 : 5000,
   },
 
-  /* Run your local dev server before starting the tests */
-  webServer: {
-    command: 'npm run dev',     // Komento, jolla React-fronttisi käynnistyy lokaalisti (esim. 'npm run dev' jos käytät Viteä)
-    url: 'http://localhost:5173', // Portti, jossa React-fronttisi kuuntelee (esim. 3000 tai 5173)
-    reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
-  },
-   
   use: {
-    /* Base URL to use in actions like `await page.goto('')`. */
     baseURL: 'http://localhost:5173',
-
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry',
+    trace: 'retain-on-failure',
   },
 
   /* Configure projects for major browsers */
