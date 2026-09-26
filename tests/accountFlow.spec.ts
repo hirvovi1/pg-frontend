@@ -1,18 +1,24 @@
 import { test, expect } from '@playwright/test';
 
-test('creates an account with a whale promo code', async ({page}) => {
-    // 1. Luodaan uniikki nimi tälle testille (tai haetaan jos beforeEach asetti sen)
+
+
+
+test('creates an account with a whale promo code', async ({ page }) => {
     const uniqueName = `Seppäilyrahasto-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
-    (page as any).uniqueName = uniqueName; // Tallennetaan afterEachia varten!
+    (page as any).uniqueName = uniqueName;
 
     await page.goto('/');
-    await expect(page.getByRole('button', { name: 'Products', exact: true })).toBeVisible();
 
-    await page.getByRole('button', {name: 'Products', exact: true}).click();
-    await expect(page.getByRole('heading', {name: 'Products'})).toBeVisible();
+    const productsButton = page.getByRole('button', { name: 'Products', exact: true });
+    await expect(productsButton).toBeVisible();
 
-    await page.getByRole('button', {name: /^Cart/}).click();
-    await expect(page.getByRole('heading', {name: 'Shopping Cart'})).toBeVisible();
+    // Klikataan ja varmistetaan, että Products-näkymä latautuu
+    await productsButton.click();
+    await expect(page.getByRole('heading', { name: 'Products' })).toBeVisible();
+
+    // Nyt sovelluksen reititys on varmasti pystyssä, ja Cart-nappi toimii 100% stabiilisti
+    await page.getByRole('button', { name: /^Cart/ }).click();
+    await expect(page.getByRole('heading', { name: 'Shopping Cart' })).toBeVisible();
 
     await page.getByRole('button', {name: 'Accounts', exact: true}).click();
     await expect(page.getByRole('heading', {name: 'Shopping Cart'})).toBeHidden();
