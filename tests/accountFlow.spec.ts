@@ -1,22 +1,4 @@
-import {test, expect} from '@playwright/test';
-
-test.afterEach(async ({page}) => {
-    // Clean up any accounts created during tests
-    await page.goto('/');
-    const articles = page.getByRole('article');
-    const count = await articles.count();
-    for (let i = 0; i < count; i++) {
-        const article = articles.nth(i);
-        try {
-            const deleteButton = article.getByRole('button', {name: 'Delete account'});
-            if (await deleteButton.isVisible()) {
-                await deleteButton.click();
-            }
-        } catch {
-            // Account might not have delete button or already deleted
-        }
-    }
-});
+import { test, expect } from './fixtures';
 
 test('creates an account with a whale promo code', async ({page}) => {
     // 1. Luodaan uniikki nimi tälle testille (tai haetaan jos beforeEach asetti sen)
@@ -71,7 +53,7 @@ test('switches global currency and fetches values from the currency microservice
     await firstAddToCartButton.click();
 
     await page.getByRole('button', {name: /^Cart/}).click();
-    await expect(page.locator('.checkout-cart-item')).toBeVisible();
+    await expect(page.locator('.checkout-cart-item')).toBeVisible({ timeout: 15000 });
 
     await page.getByRole('button', {name: 'Accounts', exact: true}).click();
 

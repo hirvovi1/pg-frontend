@@ -46,62 +46,6 @@ jobs:
             --label "com.docker.compose.network=mock-payment-network" \
             mock-payment-network
 
-      # 6. Start Core Backend Engine (Port 8080)
-      - name: Start Core Backend Engine
-        run: docker compose -f pgapi/compose.yaml up --build -d
-
-      # 7. Start Microservices Stack (Ports 8090 & 8095)
-      - name: Start Microservices Stack
-        run: docker compose -f pg-backend-platform/docker-compose.yaml up --build -d
-
-        # 8. Comprehensive Cluster Health Verification
-      - name: Wait for All Services to be ready
-        run: |
-          set -euo pipefail
-
-          wait_for_service() {
-            local service_name="$1"
-            local url="$2"
-            local attempts=30
-
-            for ((attempt = 1; attempt <= attempts; attempt++)); do
-              http_code="$(curl \
-                --silent \
-                --show-error \
-                --output /dev/null \
-                --write-out '%{http_code}' \
-                --connect-timeout 5 \
-                --max-time 10 \
-                "$url" || true)"
-
-              if [[ "$http_code" =~ ^2[0-9]{2}$ ]]; then
-                echo "$service_name is ready (HTTP $http_code)."
-                return 0
-              fi
-
-              printf 'Waiting for %s (%d/%d)...\n' "$service_name" "$attempt" "$attempts"
-              sleep 4
-            done
-
-            echo "Timed out waiting for $service_name at $url" >&2
-            return 1
-          }
-
-          wait_for_service "Core Backend API" "http://localhost:8080/accounts"
-          wait_for_service "Health Pulse monitor" "http://localhost:8095/api/pulse/stream"
-          wait_for_service "Micro Service Facade carts" "http://localhost:8091/api/v1/frontend/carts"
-          wait_for_service "Micro Service Facade pproducts" "http://localhost:8091/api/v1/frontend/products"
-          echo "Entire cluster network mesh is active and responding!"
-
-      # 9. Dump execution environment states on failures
-      - name: Dump Core Backend logs on failure
-        if: always()
-        run: docker compose -f pgapi/compose.yaml logs
-
-      - name: Dump Microservices logs on failure
-        if: always()
-        run: docker compose -f pg-backend-platform/docker-compose.yaml logs
-
       # 10. Node setup and dependency injection execution
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -120,15 +64,6 @@ jobs:
         run: npx playwright test --workers=1
         env:
           REACT_APP_API_URL: http://localhost:8080
-
-      # 12. Graceful cluster cleanup
-      - name: Stop Microservices containers
-        if: always()
-        run: docker compose -f pg-backend-platform/docker-compose.yaml down
-
-      - name: Stop Core Backend containers
-        if: always()
-        run: docker compose -f pgapi/compose.yaml down
 
       # 13. Save output artifact trace packages
       - name: Upload Playwright report

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { expect, test } from "@playwright/test";
-import type { TelemetryEvent } from "../src/services/healthPulseService";
+import { test, expect } from './fixtures';
+import type { TelemetryEvent } from "../src/services/healthPulseService.ts";
 
 test.describe("healthPulseService", () => {
   test("opens the SSE stream and parses valid telemetry events", async ({ page }) => {
@@ -48,7 +48,7 @@ test.describe("healthPulseService", () => {
 
     await page.goto("/");
     const result = await page.evaluate(async () => {
-      const { healthPulseService } = await import("../src/services/healthPulseService");
+      const { healthPulseService } = await import("../src/services/healthPulseService.ts");
       const waitForMs = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
       const receivedEvents: TelemetryEvent[] = [];
@@ -109,7 +109,7 @@ test.describe("healthPulseService", () => {
     await page.goto("/");
 
     const result = await page.evaluate(async () => {
-      const { healthPulseService } = await import("../src/services/healthPulseService");
+      const { healthPulseService } = await import("../src/services/healthPulseService.ts");
       const receivedEvents: TelemetryEvent[] = [];
 
       const onEvent = (telemetryData: TelemetryEvent) => {
@@ -145,7 +145,7 @@ test.describe("healthPulseService", () => {
     await page.goto("/");
 
     const result = await page.evaluate(async () => {
-      const { healthPulseService } = await import("../src/services/healthPulseService");
+      const { healthPulseService } = await import("../src/services/healthPulseService.ts");
       const unsubscribe = healthPulseService.subscribeToPulse(() => undefined);
       unsubscribe();
 
