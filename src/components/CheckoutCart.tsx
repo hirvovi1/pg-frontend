@@ -5,6 +5,8 @@ import {useCurrency} from "../context/CurrencyContext";
 import {MoneyDisplay} from "./MoneyDisplay";
 import CartItemComponent from "./CartItemComponent";
 import './CheckoutCart.css';
+import {type Order, type OrderItem, orderService} from "../services/orderService.ts";
+import {assertNonNull, assertNumber} from "../utils/asserts.ts";
 
 const PENDING_TRANSACTION_STORAGE_KEY = "pending_transaction_id";
 
@@ -12,6 +14,14 @@ interface CheckoutCartProps {
     accounts: Account[];
     cartId: number;
 }
+
+function createOrderItems(items: CartItem[]): OrderItem[] {
+    return items.map((item: CartItem): OrderItem => ({
+        productId: item.productId,
+        itemCount: item.itemCount
+    }));
+}
+
 
 function CheckoutCart({accounts, cartId}: CheckoutCartProps) {
     const {currency} = useCurrency();
@@ -111,12 +121,27 @@ function CheckoutCart({accounts, cartId}: CheckoutCartProps) {
         setIsLoading(true);
 
         try {
+            console.info('[CheckoutCart] Starting checkout process');
+            const order: Order = await orderService.addOrder({
+                id: undefined,
+                cartId: cartId,
+                orderPlaced: new Date().toISOString(),
+                quantity: cartData.items?.length,
+                status: 'PENDING',
+                items: createOrderItems(cartData.items),
+            });
+            console.info('[CheckoutCart] Order created', order);
+
             const merchantAccount = await paytrailService.ensureMerchantAccount();
             const idempotencyKey = crypto.randomUUID();
+            console.debug('[CheckoutCart] Merchant account', merchantAccount);
+            console.debug('[CheckoutCart] IDempotency key', idempotencyKey);
+
             const response = await paytrailService.executeTransfer({
                 idempotencyKey,
                 accountIdFrom: selectedBuyerId,
                 accountIdTo: merchantAccount.id,
+                orderId: assertNumber(order.id, "Order ID is null"),
                 amountInCents: totalInCents,
             });
 

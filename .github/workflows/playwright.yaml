@@ -8,8 +8,6 @@ jobs:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
-      - name: Collect Workflow Telemetry
-        uses: catchpoint/workflow-telemetry-action@v2
 
       # 1. Pull the React frontend code (this repository)
       - name: Checkout frontend
