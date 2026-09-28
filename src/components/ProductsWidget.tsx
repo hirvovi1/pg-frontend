@@ -3,7 +3,7 @@ import type { Product } from "../services/productService";
 import { cartService } from "../services/cartService";
 import { MoneyDisplay } from "./MoneyDisplay";
 import "./ProductsWidget.css";
-import { assertNonNull } from '../utils/asserts';
+import {assertNonNull, assertNumber} from '../utils/asserts';
 
 interface ProductsWidgetProps {
   cartId: number | null;
@@ -21,12 +21,12 @@ export function ProductsWidget({
 
   const handleAddToCart = (product: Product) => {
 
-    assertNonNull(product.id, "Tuotteelta puuttuu ID!");
-    const quantity: number = quantities[product.id] ?? 1;
+    const productId = assertNumber(product.id, "Tuotteelta puuttuu ID!");
+    const quantity: number = quantities[productId] ?? 1;
 
     if (product.id && cartId) {
       cartService.addToCart(cartId, {
-        productId: product.id,
+        productId: productId,
         productName: product.name,
         itemCount: quantity,
         priceInCents: product.priceInCents,
