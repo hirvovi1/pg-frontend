@@ -23,11 +23,6 @@ export function HealthPulseWidget() {
     const [systemStatuses, setSystemStatuses] = useState<
         Record<string, ServiceStatus>
     >({
-        "Java account api": {
-            status: "WARNING",
-            latency: "0ms",
-            lastCheck: "Connecting...",
-        },
         "currency service": {
             status: "WARNING",
             latency: "0ms",
