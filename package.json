@@ -8,6 +8,8 @@
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
+    "postinstall": "cross-env PLAYWRIGHT_BROWSERS_PATH=0 playwright install --with-deps",
+
 
     "docker:up": "docker compose -f /home/ville/IdeaProjects/pgapi/compose.yaml up -d && docker compose -f /home/ville/IdeaProjects/pg-backend-platform/docker-compose.yaml up -d",
     "docker:up:ci": "docker compose -f pgapi/compose.yaml up -d && docker compose -f pg-backend-platform/docker-compose.yaml up -d",
@@ -15,8 +17,9 @@
     "docker:down": "docker compose -f /home/ville/IdeaProjects/pgapi/compose.yaml down -v && docker compose -f /home/ville/IdeaProjects/pg-backend-platform/docker-compose.yaml down -v",
     "docker:down:ci": "docker compose -f pgapi/compose.yaml down -v && docker compose -f pg-backend-platform/docker-compose.yaml down -v",
 
-    "test:e2e": "npm run docker:down && npm run docker:up && concurrently -k -s first \"npm run dev\" \"wait-on http://localhost:5173 http://localhost:8080/accounts http://localhost:8091/api/v1/frontend/products && npx playwright test --workers=1 && npm run docker:down\"",
-    "test:e2e:ci": "npm run docker:up:ci && concurrently -k -s first \"npm run dev\" \"wait-on http://localhost:5173 http://localhost:8080/accounts http://localhost:8091/api/v1/frontend/products && npx playwright test --workers=1 && npm run docker:down:ci\""
+    "test:e2e": "scripts/run-e2e.sh",
+
+    "test:e2e:ci": "scripts/run-e2e-ci.sh"
   },
 
   "dependencies": {
