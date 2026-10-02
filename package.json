@@ -8,7 +8,7 @@
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "postinstall": "cross-env PLAYWRIGHT_BROWSERS_PATH=0 playwright install --with-deps",
+    "postinstall": "PLAYWRIGHT_BROWSERS_PATH=0 playwright install --with-deps",
 
 
     "docker:up": "docker compose -f /home/ville/IdeaProjects/pgapi/compose.yaml up -d && docker compose -f /home/ville/IdeaProjects/pg-backend-platform/docker-compose.yaml up -d",
