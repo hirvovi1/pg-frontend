@@ -8,7 +8,7 @@ export interface OrderItem {
 
 export interface Order {
   id?: number
-  productId: number
+  cartId: number,
   orderPlaced?: string
   quantity: number
   status: string

@@ -17,6 +17,7 @@ export interface TransferRequest {
   idempotencyKey: string; // UUID
   accountIdFrom: string;  // UUID
   accountIdTo: string;    // UUID
+  orderId: number,
   amountInCents: number;
 }
 

@@ -99,6 +99,9 @@ function MockPaymentPage({ transactionId, amountInCents }: MockPaymentPageProps)
     return isPolling ? 'led-polling' : 'led-pending'
   }
 
+  const isReturnDisabled = !status || status.status === 'PENDING';
+
+
   return (
     <main className="mock-payment-page">
       <section className="mock-payment-panel" aria-labelledby="mock-payment-title">
@@ -142,7 +145,12 @@ function MockPaymentPage({ transactionId, amountInCents }: MockPaymentPageProps)
           <p className="message error">{statusError || 'No transaction was provided for this payment.'}</p>
         )}
 
-        <button className="mock-payment-button" type="button" onClick={returnToShop}>
+        <button
+            className="mock-payment-button"
+            type="button"
+            onClick={returnToShop}
+            disabled={isReturnDisabled}
+        >
           Return to shop
         </button>
       </section>

@@ -6,6 +6,17 @@ import { SystemStatusProvider, useSystemStatus } from "./context/SystemStatusCon
 import { HealthPulseWidget } from './components/HealthPulseWidget';
 import { ShopApp } from "./components/ShopApp";
 
+function amountInCents() {
+  const searchParams = new URLSearchParams(window.location.search);
+  const rawAmount = searchParams.get('amountCents');
+  return Number(rawAmount);
+}
+
+function getTransactionId() {
+  const pathSegments = window.location.pathname.split('/').filter(Boolean);
+  return pathSegments.at(-1) ?? '';
+}
+
 function AppContent() {
   const { globalAlert } = useSystemStatus();
   const isMockPayment = window.location.pathname.startsWith('/mock-payment')
@@ -14,12 +25,7 @@ function AppContent() {
   let pageContent;
 
   if (isMockPayment) {
-    const transactionId = window.location.pathname.split('/').filter(Boolean).at(-1) ?? ''
-    const amountParam = new URLSearchParams(window.location.search).get('amountCents')
-    const parsedAmount = amountParam === null ? null : Number(amountParam)
-    const amountInCents = Number.isFinite(parsedAmount) ? parsedAmount : null
-
-    pageContent = <MockPaymentPage transactionId={transactionId} amountInCents={amountInCents} />
+    pageContent = <MockPaymentPage transactionId={getTransactionId()} amountInCents={amountInCents()} />
   } else {
     pageContent = (
       <ShopApp healthWidget={healthWidget} onToggleWidget={() => setHealthWidget(prev => !prev)} />

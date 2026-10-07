@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import type { Account } from "../services/paytrailservice";
 import { paytrailService } from "../services/paytrailservice";
 import type { Product } from "../services/productService";
@@ -13,6 +13,7 @@ import { ProductsWidget } from "./ProductsWidget";
 import { ShopHeader } from "./ShopHeader";
 
 type View = 'accounts' | 'cart' | 'products';
+
 
 interface ShopAppProps {
   healthWidget: boolean;
@@ -29,8 +30,43 @@ export function ShopApp({ healthWidget, onToggleWidget }: ShopAppProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentView, setCurrentView] = useState<View>('accounts');
   const [deletingAccountId, setDeletingAccountId] = useState<string | null>(null);
-  const [cartCount, setCartCount] = useState(() => cartService.getItemCount());
+  const [cartId, setCartId] = useState<number | null>(null);
+  const cartInitializing = useRef(false);
+  const [cartCount, setCartCount] = useState(0);
   const { globalAlert } = useSystemStatus();
+
+  useEffect(() => {
+    const initializeCart = async () => {
+      try {
+        console.info("[ShopApp] Creating fresh cart...");
+        if (cartInitializing.current) return;
+        cartInitializing.current = true;
+        const id = await cartService.createCart();
+        console.info("cart created with id: ", id)
+        setCartId(id);
+      } catch (err) {
+        console.error("Virhe ostoskorin alustuksessa:", err);
+        setError("Ostoskorin luonti epäonnistui taustapalvelun virheen vuoksi.");
+      }
+    };
+
+    void initializeCart();
+  }, []);
+
+  useEffect(() => {
+    const fetchCount = async () => {
+      try {
+        const count = cartId ? await cartService.getItemCount(cartId) : 0;
+        setCartCount(count);
+      } catch (error) {
+        console.error("Virhe ostoskorin määrän haussa:", error);
+      }
+    };
+
+    if (cartId) {
+      fetchCount();
+    }
+  });
 
   // Close health widget if health service goes down
   useEffect(() => {
@@ -78,13 +114,14 @@ export function ShopApp({ healthWidget, onToggleWidget }: ShopAppProps) {
   }, []);
 
   useEffect(() => {
-    const handleCartChange = () => {
-      setCartCount(cartService.getItemCount());
+    const handleCartChange = async () => {
+      const itemCount: number = cartId ? await cartService.getItemCount(cartId ) : 0;
+      setCartCount(itemCount);
     };
 
     window.addEventListener('cart-updated', handleCartChange);
     return () => window.removeEventListener('cart-updated', handleCartChange);
-  }, []);
+  });
 
   const refreshAccounts = () => {
     console.info("[ShopApp] Refreshing accounts after account creation");
@@ -145,10 +182,11 @@ export function ShopApp({ healthWidget, onToggleWidget }: ShopAppProps) {
         />
       )}
 
-      {currentView === 'cart' && <CheckoutCartWidget accounts={accounts} />}
+      {currentView === 'cart' && cartId && <CheckoutCartWidget cartId={cartId} accounts={accounts} />}
 
       {currentView === 'products' && (
         <ProductsWidget
+          cartId={cartId}
           products={products}
           isLoading={isProductsLoading}
         />

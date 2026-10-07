@@ -2,29 +2,34 @@ import { useState } from "react";
 import type { Product } from "../services/productService";
 import { cartService } from "../services/cartService";
 import { MoneyDisplay } from "./MoneyDisplay";
-import "./ProductsWidget.css"; // <-- Tuodaan uudet tyylit sisään!
+import "./ProductsWidget.css";
+import {assertNonNull, assertNumber} from '../utils/asserts';
 
 interface ProductsWidgetProps {
+  cartId: number | null;
   products: Product[];
   isLoading: boolean;
 }
 
 export function ProductsWidget({
+                                 cartId,
                                  products,
                                  isLoading,
                                }: ProductsWidgetProps) {
   const [quantities, setQuantities] = useState<Record<number, number>>({});
-// 1. Lisää uusi tila (state) komponentin alkuun trackaamaan "Added"-efektiä
   const [addedProductId, setAddedProductId] = useState<number | null>(null);
 
   const handleAddToCart = (product: Product) => {
-    const quantity = quantities[product.id!] || 1;
-    if (product.id) {
-      cartService.addToCart({
-        productId: product.id,
+
+    const productId = assertNumber(product.id, "Tuotteelta puuttuu ID!");
+    const quantity: number = quantities[productId] ?? 1;
+
+    if (product.id && cartId) {
+      cartService.addToCart(cartId, {
+        productId: productId,
         productName: product.name,
-        quantity,
-        priceInCents: product.price,
+        itemCount: quantity,
+        priceInCents: product.priceInCents,
       });
       console.info("[ProductsWidget] Added to cart", { productId: product.id, quantity });
 
@@ -70,7 +75,7 @@ export function ProductsWidget({
 
                 <div className="product-right-side">
                   <p className="product-price">
-                    <MoneyDisplay amountInCents={product.price} />
+                    <MoneyDisplay amountInCents={product.priceInCents} />
                   </p>
 
                   <div className="product-actions">
